@@ -1,0 +1,6 @@
+{
+  "name": "RE - Centre for Exploratory Research",
+  "description": "The central research ecosystem of Kumaraguru Institutions connecting scholars, faculty, innovators, and industry partners for Regional Scientific Translations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
