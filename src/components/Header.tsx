@@ -247,7 +247,7 @@ export default function Header({
 >
   {/* Ré Logo */}
   <img
-    src="src/assets/images/logo.png"   // Update with your logo path
+    src="/images/logo.png"   // Update with your logo path
     alt="Ré Logo"
     className="
       h-12

@@ -71,7 +71,7 @@ const RECENT_ACTIVITIES = [
     category: 'International Contest',
     title: 'Runner UP Sustainability Award in International Small Wind Turbine Contest 2026',
     summary: 'Competing against 13 international teams, the team showcased its innovative and sustainable small wind turbine technology. Their efforts were recognized with the Runner-Up Award in the Sustainability Category, bringing global recognition to Indian engineering and innovation.',
-    image: '/src/assets/images/Sulal.jpg',
+    image: '/images/Sulal.jpg',
     icon: Sparkles,
   },
   {
@@ -81,7 +81,7 @@ const RECENT_ACTIVITIES = [
     title: 'Top 11 Startup at the Zero Project Technology Forum',
     summary:
       'HeaRMeNow, developed by Nandeeswaran K, Rengha Shree, and Hemavarshini, was selected among the Top 11 startups at the Zero Project Technology Forum, supported by Enable India, for its assistive technology innovation.',
-    image: '/src/assets/images/recent_3.jpeg',
+    image: '/images/recent_3.jpeg',
     icon: Award,
   },
   {
@@ -91,7 +91,7 @@ const RECENT_ACTIVITIES = [
     title: 'Selected for the Environment Policy & Action Youth Fellowship',
     summary:
       'Aparna R M was selected for the Environment Policy & Action Youth Fellowship (April 2025) by IMPRI, recognizing her commitment to sustainability and policy-driven research.',
-    image: '/src/assets/images/recent_2.jpeg',
+    image: '/images/recent_2.jpeg',
     icon: Award,
   },
   {
@@ -101,7 +101,7 @@ const RECENT_ACTIVITIES = [
     title: 'KRIP Cohort I Begins',
     summary:
       'The inaugural Cohort I of the Kumaraguru Research Internship Program (KRIP) commenced, providing students with immersive research experiences under faculty mentorship across diverse disciplines.',
-    image: '/src/assets/images/recent_4.jpeg',
+    image: '/images/recent_4.jpeg',
     icon: GraduationCap,
   },
 ];
@@ -619,11 +619,11 @@ const ECOSYSTEM_STEPS = [
 ];
 
 const videos = [
-  "src/assets/videos/video1.mp4",
-  "src/assets/videos/video 2.mp4",
-  "src/assets/videos/video3.mp4",
-  "src/assets/videos/video 4.mp4",
-  "src/assets/videos/video 5.mp4",
+  "/videos/video1.mp4",
+  "/videos/video 2.mp4",
+  "/videos/video3.mp4",
+  "/videos/video 4.mp4",
+  "/videos/video 5.mp4",
 ];
 const PROGRAMS = [
   {
@@ -637,7 +637,7 @@ const PROGRAMS = [
     index: "01",
     icon: Compass,
     image:
-      "/src/assets/images/exploration_circle.jpeg",
+      "/images/exploration_circle.jpeg",
   },
 
   {
@@ -651,7 +651,7 @@ const PROGRAMS = [
     index: "02",
     icon: Layers,
     image:
-      "/src/assets/images/core.jpeg",
+      "/images/core.jpeg",
   },
 
   {
@@ -665,7 +665,7 @@ const PROGRAMS = [
     index: "03",
     icon: GraduationCap,
     image:
-      "/src/assets/images/krest.jpeg",
+      "/images/krest.jpeg",
   },
 
   {
@@ -679,7 +679,7 @@ const PROGRAMS = [
     index: "04",
     icon: Sparkles,
     image:
-      "/src/assets/images/urop.jpeg",
+      "/images/urop.jpeg",
   },
 
   {
@@ -693,7 +693,7 @@ const PROGRAMS = [
     index: "05",
     icon: Compass,
     image:
-      "/src/assets/images/krip.jpeg",
+      "/images/krip.jpeg",
   },
 
   {
@@ -707,7 +707,7 @@ const PROGRAMS = [
     index: "06",
     icon: Layers,
     image:
-      "/src/assets/images/project_intake.jpeg",
+      "/images/project_intake.jpeg",
   },
 ];
 
@@ -753,7 +753,7 @@ const RE_TESTIMONIALS = [
     author: "Varshini",
     role: "KRIP Intern",
     date: "",
-    avatar: "src/assets/testimonials/varshini.jpeg",
+    avatar: "/testimonials/varshini.jpeg",
   },
   {
     id: "testm-2",
@@ -762,7 +762,7 @@ const RE_TESTIMONIALS = [
     author: "Tharini",
     role: "Research & Administrative Fellow",
     date: "",
-    avatar: "src/assets/testimonials/tharini.jpeg",
+    avatar: "/testimonials/tharini.jpeg",
   },
   {
     id: "testm-4",
@@ -771,7 +771,7 @@ const RE_TESTIMONIALS = [
     author: "Rengha Shree",
     role: "Research Fellow",
     date: "",
-    avatar: "src/assets/testimonials/renghasree.jpeg",
+    avatar: "/testimonials/renghasree.jpeg",
   },
 
   {
@@ -781,7 +781,7 @@ const RE_TESTIMONIALS = [
     author: "Tharika",
     role: "Research Fellow",
     date: "",
-    avatar: "src/assets/testimonials/tharika.jpeg",
+    avatar: "/testimonials/tharika.jpeg",
   },
 
   {
@@ -791,7 +791,7 @@ const RE_TESTIMONIALS = [
     author: "Student Researcher",
     role: "KREST Participant",
     date: "",
-    avatar: "/images/testimonials/student1.jpg",
+    avatar: "/testimonials/student1.jpg",
   },
 
   {
@@ -801,7 +801,7 @@ const RE_TESTIMONIALS = [
     author: "Research Intern",
     role: "KRIP Participant",
     date: "",
-    avatar: "/images/testimonials/student2.jpg",
+    avatar: "/testimonials/student2.jpg",
   },
   
 
@@ -812,7 +812,7 @@ const RE_TESTIMONIALS = [
     author: "Research Circle Member",
     role: "Student Researcher",
     date: "",
-    avatar: "/images/testimonials/student3.jpg",
+    avatar: "/testimonials/student3.jpg",
   },
     {
     id: "testm-1",
@@ -821,7 +821,7 @@ const RE_TESTIMONIALS = [
     author: "Nandeeswaran",
     role: "Alumnus | Batch 2022–2026",
     date: "",
-    avatar: "src/assets/testimonials/Nandees.jpg",
+    avatar: "/testimonials/Nandees.jpg",
   },
 
   {
@@ -831,7 +831,7 @@ const RE_TESTIMONIALS = [
     author: "Alumni Researcher",
     role: "Former Ré Member",
     date: "",
-    avatar: "/images/testimonials/alumni.jpg",
+    avatar: "/testimonials/alumni.jpg",
   },
 ];
 const RiverDeltaBackground = () => (
@@ -1252,7 +1252,7 @@ export default function App() {
   <motion.div
     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
     style={{
-      backgroundImage: "url('/src/assets/images/decade.jpeg')",
+      backgroundImage: "url('/images/decade.jpeg')",
     }}
     initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
     animate={{ opacity: 1, scale: 1 }}
