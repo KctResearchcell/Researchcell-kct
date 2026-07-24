@@ -13,6 +13,7 @@ import OpenChallengesPage from './pages/OpenChallengesPage';
 import ProgramsPage from './pages/ProgramsPage';
 import ApplicationsRequestsHub from './pages/CareersPage';
 import EventsPage from './pages/EventsPage';
+import EventDetailPage from './pages/EventDetailPage';
 import AboutPage from './pages/AboutPage';
 import PeoplePage from './pages/PeoplePage';
 import ResearchPage from './pages/ResearchPage';
@@ -1144,8 +1145,23 @@ export default function App() {
   };
 
   const renderView = () => {
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/events/') && pathname !== '/events/') {
+      const pathSlug = pathname.replace('/events/', '').split('?')[0].split('/')[0];
+      if (pathSlug && !['all', 'host', 'register', 'speakers', 'partner'].includes(pathSlug)) {
+        return <EventDetailPage slug={pathSlug} onNavigate={navigateTo} />;
+      }
+    }
+
     const parsedParts = currentHash.split('#');
     const cleanHash = parsedParts[1] ? `#${parsedParts[1]}` : '#/';
+
+    if (cleanHash.startsWith('#/events/')) {
+      const eventSlug = cleanHash.replace('#/events/', '').split('?')[0].split('/')[0];
+      if (eventSlug && !['all', 'host', 'register', 'speakers', 'partner'].includes(eventSlug)) {
+        return <EventDetailPage slug={eventSlug} onNavigate={navigateTo} />;
+      }
+    }
 
     if (cleanHash === '#/' || cleanHash === '') return renderHome();
 
@@ -1245,12 +1261,12 @@ export default function App() {
       {/* 01 — Hero */}
 <section
   id="home-hero"
-  className="relative isolate min-h-[980px] overflow-hidden border-b border-black/10 bg-[#F5F4EF] text-[#101010] lg:min-h-[calc(100svh-24px)]"
+  className="relative isolate overflow-hidden border-b border-black/10 bg-[#F5F4EF] text-[#101010] lg:min-h-[calc(100svh-24px)]"
   aria-labelledby="home-hero-title"
 >
   {/* Background image containing only the visual “10” */}
   <motion.div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+    className="hidden lg:block absolute inset-0 bg-cover bg-center bg-no-repeat"
     style={{
       backgroundImage: "url('/images/decade.jpeg')",
     }}
@@ -1274,13 +1290,7 @@ export default function App() {
     aria-hidden="true"
   />
 
-  {/* Mobile image fade */}
-  <div
-    className="pointer-events-none absolute inset-x-0 top-[37vh] h-[22vh] bg-gradient-to-b from-transparent via-[#F5F4EF]/90 to-[#F5F4EF] lg:hidden"
-    aria-hidden="true"
-  />
-
-  <div className="relative mx-auto flex min-h-[980px] max-w-[1680px] flex-col px-6 pb-10 pt-[52vh] sm:px-10 sm:pt-[58vh] lg:min-h-[calc(100svh-24px)] lg:px-16 lg:pb-9 lg:pt-0 xl:px-20">
+  <div className="relative mx-auto flex max-w-[1680px] flex-col px-6 pb-12 pt-12 sm:px-10 sm:pb-16 sm:pt-16 lg:min-h-[calc(100svh-24px)] lg:px-16 lg:pb-9 lg:pt-0 xl:px-20">
     <div className="grid flex-1 items-center gap-12 lg:grid-cols-[0.82fr_1.25fr_0.48fr]">
       {/* Left editorial content */}
       <div className="relative z-10 max-w-[610px] lg:py-24">

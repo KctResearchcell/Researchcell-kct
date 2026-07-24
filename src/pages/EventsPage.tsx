@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { EVENTS } from '../data';
+import { getEvents } from '../services/events';
+import { EventItem } from '../types';
 import {
   ArrowDown,
   ArrowRight,
@@ -13,11 +14,27 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-type SourceEvent = (typeof EVENTS)[number];
+type SourceEvent = Partial<EventItem> & {
+  id?: string;
+  title: string;
+  slug?: string;
+  short_description?: string;
+  description?: string;
+  start_time?: string;
+  date?: string;
+  cover_image?: string | null;
+  public_status?: string;
+  status?: string;
+  mode?: string;
+  type?: string;
+  category?: string;
+  venue?: string;
+};
 type EventStatus = 'Open' | 'Closing Soon' | 'Upcoming' | 'Past';
 
 type DisplayEvent = {
   id: string;
+  slug: string;
   title: string;
   eyebrow: string;
   description: string;
@@ -63,6 +80,7 @@ const CATEGORIES = [
 const FEATURED_EVENTS: DisplayEvent[] = [
   {
     id: 'event-icon-2026',
+    slug: 'event-icon-2026',
     title: 'ICON 2026',
     eyebrow: 'International Conference',
     description:
@@ -73,10 +91,11 @@ const FEATURED_EVENTS: DisplayEvent[] = [
     category: 'Conferences',
     status: 'Open',
     image: EVENT_IMAGES['event-icon-2026'],
-    href: '/events/event-icon-2026',
+    href: '#/events/event-icon-2026',
   },
   {
     id: 'research-week-2026',
+    slug: 'research-week-2026',
     title: 'Research Week',
     eyebrow: 'Interdisciplinary Showcase',
     description:
@@ -87,10 +106,11 @@ const FEATURED_EVENTS: DisplayEvent[] = [
     category: 'Competitions',
     status: 'Closing Soon',
     image: FALLBACK_IMAGES[1],
-    href: '/events/research-week-2026',
+    href: '#/events/research-week-2026',
   },
   {
     id: 'coffee-table-talks-2026',
+    slug: 'coffee-table-talks-2026',
     title: 'Coffee Table Talks',
     eyebrow: 'Research Conversation Series',
     description:
@@ -101,7 +121,7 @@ const FEATURED_EVENTS: DisplayEvent[] = [
     category: 'Research Talks',
     status: 'Upcoming',
     image: FALLBACK_IMAGES[2],
-    href: '/events/coffee-table-talks-2026',
+    href: '#/events/coffee-table-talks-2026',
   },
 ];
 
@@ -194,7 +214,11 @@ function parseYear(value: string): number {
 }
 
 function getSourceImage(event: SourceEvent, index: number): string {
-  return EVENT_IMAGES[event.id] ?? FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+  if (event.cover_image) {
+    return event.cover_image;
+  }
+  const identifier = event.id ?? event.slug ?? '';
+  return EVENT_IMAGES[identifier] ?? FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
 }
 
 function normalizeCategory(type: string): string {
@@ -209,20 +233,55 @@ function normalizeCategory(type: string): string {
   return 'Conferences';
 }
 
+function formatEventDate(dateStr?: string): { formattedDate: string; month: string } {
+  if (!dateStr) {
+    return { formattedDate: 'Upcoming', month: 'Upcoming' };
+  }
+
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime()) && (dateStr.includes('T') || dateStr.includes('-'))) {
+    const day = parsed.getDate();
+    const month = parsed.toLocaleString('en-US', { month: 'long' });
+    const year = parsed.getFullYear();
+    return { formattedDate: `${day} ${month} ${year}`, month };
+  }
+
+  const firstWord = dateStr.split(' ')[0] || 'Upcoming';
+  return { formattedDate: dateStr, month: firstWord };
+}
+
+function mapPublicStatus(publicStatus?: string, legacyStatus?: string, index?: number): EventStatus {
+  const statusVal = (publicStatus || legacyStatus || '').toLowerCase();
+  if (statusVal === 'open') return 'Open';
+  if (statusVal === 'upcoming') return 'Upcoming';
+  if (statusVal === 'completed' || statusVal === 'closed' || statusVal === 'past') return 'Past';
+  if (statusVal === 'closing_soon' || statusVal === 'closing soon') return 'Closing Soon';
+  return index === 1 ? 'Closing Soon' : 'Open';
+}
+
 function sourceToDisplay(event: SourceEvent, index: number): DisplayEvent {
-  const category = normalizeCategory(event.type ?? 'Conference');
+  const categoryRaw = event.category ?? event.type ?? 'Conference';
+  const category = normalizeCategory(categoryRaw);
+  const rawDate = event.start_time ?? event.date;
+  const { formattedDate, month } = formatEventDate(rawDate);
+  const status = mapPublicStatus(event.public_status, event.status, index);
+  const eyebrow = event.mode ?? event.type ?? category;
+  const description = event.short_description ?? event.description ?? '';
+  const slug = event.slug ?? event.id ?? `event-${index}`;
+
   return {
-    id: event.id,
+    id: String(event.id ?? slug),
+    slug: String(slug),
     title: event.title,
-    eyebrow: event.type ?? category,
-    description: event.description,
-    date: event.date,
-    month: event.date.split(' ')[0] || 'Upcoming',
-    venue: event.venue,
+    eyebrow,
+    description,
+    date: formattedDate,
+    month,
+    venue: event.venue ?? 'Kumaraguru Campus',
     category,
-    status: event.status === 'past' ? 'Past' : index === 1 ? 'Closing Soon' : 'Open',
+    status,
     image: getSourceImage(event, index),
-    href: `/events/${event.id}`,
+    href: `#/events/${slug}`,
   };
 }
 
@@ -448,13 +507,41 @@ function ArchiveAccordion({ year }: { year: number }) {
 
 export default function EventsPage() {
   const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]>('All');
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const sourceEvents = useMemo(() => EVENTS.map(sourceToDisplay), []);
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    getEvents()
+      .then((data) => {
+        if (isMounted) {
+          const eventsList = Array.isArray(data) ? data : data?.events || [];
+          setEvents(eventsList);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch events');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const sourceEvents = useMemo(() => events.map(sourceToDisplay), [events]);
   const upcomingSourceEvents = sourceEvents.filter((event) => event.status !== 'Past');
 
   const filteredFeatured = useMemo(() => {
     const combined = [...FEATURED_EVENTS, ...upcomingSourceEvents].filter(
-      (event, index, collection) => collection.findIndex((item) => item.id === event.id) === index,
+      (event, index, collection) => collection.findIndex((item) => item.slug === event.slug) === index,
     );
 
     if (activeCategory === 'All') return combined.slice(0, 6);
@@ -531,7 +618,7 @@ export default function EventsPage() {
           </motion.div>
 
           <motion.a
-            href="/events/event-icon-2026"
+            href="#/events/event-icon-2026"
             initial={{ opacity: 0, x: 35, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
@@ -630,8 +717,20 @@ export default function EventsPage() {
 
           <AnimatePresence mode="popLayout">
             <motion.div layout className="mt-12 grid gap-7 lg:grid-cols-3">
-              {filteredFeatured.length > 0 ? (
-                filteredFeatured.slice(0, 3).map((event) => <EventCard key={event.id} event={event} />)
+              {loading ? (
+                <div className="col-span-full flex items-center justify-center rounded-[32px] border border-black/10 bg-black/[0.02] py-20 text-center">
+                  <div className="flex items-center gap-3 text-sm font-medium text-black/50">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/20 border-t-[#E94B35]" />
+                    <span>Loading events...</span>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="col-span-full rounded-[32px] border border-black/10 bg-black/[0.02] px-6 py-12 text-center">
+                  <p className="text-sm font-medium text-black/60">Unable to load live events at this moment.</p>
+                  <p className="mt-1 text-xs text-black/40">{error}</p>
+                </div>
+              ) : filteredFeatured.length > 0 ? (
+                filteredFeatured.slice(0, 3).map((event) => <EventCard key={event.slug} event={event} />)
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -658,7 +757,7 @@ export default function EventsPage() {
 
           <div className="mt-12 space-y-5">
             {FEATURED_EVENTS.slice(0, 2).map((event) => (
-              <RegistrationCard key={event.id} event={event} />
+              <RegistrationCard key={event.slug} event={event} />
             ))}
           </div>
         </div>
@@ -673,61 +772,75 @@ export default function EventsPage() {
             description="Current, upcoming and completed events remain visible as part of Ré’s institutional research history."
           />
 
-          <div className="mt-16 space-y-16">
-            {timelineYears.slice(0, 4).map((year) => {
-              const group = eventsByYear[year] ?? { current: [], upcoming: [], past: [] };
-              const current = group.current.slice(0, 3);
-              const upcoming = group.upcoming.slice(0, 4);
-              const past = group.past.slice(0, 4);
+          {loading ? (
+            <div className="mt-16 flex items-center justify-center rounded-[32px] border border-black/10 bg-black/[0.02] py-20 text-center">
+              <div className="flex items-center gap-3 text-sm font-medium text-black/50">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/20 border-t-[#E94B35]" />
+                <span>Loading events timeline...</span>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="mt-16 rounded-[32px] border border-black/10 bg-black/[0.02] px-6 py-12 text-center">
+              <p className="text-sm font-medium text-black/60">Unable to load event history timeline.</p>
+              <p className="mt-1 text-xs text-black/40">{error}</p>
+            </div>
+          ) : (
+            <div className="mt-16 space-y-16">
+              {timelineYears.slice(0, 4).map((year) => {
+                const group = eventsByYear[year] ?? { current: [], upcoming: [], past: [] };
+                const current = group.current.slice(0, 3);
+                const upcoming = group.upcoming.slice(0, 4);
+                const past = group.past.slice(0, 4);
 
-              return (
-                <motion.div
-                  key={year}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-80px' }}
-                  transition={{ duration: 0.6 }}
-                  className="grid gap-8 border-t border-black/15 pt-8 lg:grid-cols-[220px_1fr] lg:gap-14"
-                >
-                  <div className="lg:sticky lg:top-8 lg:self-start">
-                    <div className="text-6xl font-semibold tracking-[-0.06em] text-[#171717] sm:text-7xl">{year}</div>
-                    <div className="mt-4 h-1 w-16 rounded-full bg-[#E94B35]" />
-                  </div>
+                return (
+                  <motion.div
+                    key={year}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-80px' }}
+                    transition={{ duration: 0.6 }}
+                    className="grid gap-8 border-t border-black/15 pt-8 lg:grid-cols-[220px_1fr] lg:gap-14"
+                  >
+                    <div className="lg:sticky lg:top-8 lg:self-start">
+                      <div className="text-6xl font-semibold tracking-[-0.06em] text-[#171717] sm:text-7xl">{year}</div>
+                      <div className="mt-4 h-1 w-16 rounded-full bg-[#E94B35]" />
+                    </div>
 
-                  <div className="grid gap-10 md:grid-cols-3">
-                    {[
-                      ['Current Events', current],
-                      ['Upcoming', upcoming],
-                      ['Past', past],
-                    ].map(([label, events]) => (
-                      <div key={label as string}>
-                        <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-black/35">{label as string}</h3>
-                        <div className="mt-5 space-y-0">
-                          {(events as DisplayEvent[]).length > 0 ? (
-                            (events as DisplayEvent[]).map((event) => (
-                              <a
-                                href={event.href}
-                                key={`${label}-${event.id}`}
-                                className="group flex items-center justify-between gap-4 border-t border-black/10 py-4 first:border-t-0"
-                              >
-                                <div>
-                                  <p className="font-medium text-black/70 transition-colors group-hover:text-[#E94B35]">{event.title}</p>
-                                  <p className="mt-1 text-xs text-black/35">{event.date}</p>
-                                </div>
-                                <ArrowRight className="h-4 w-4 shrink-0 text-black/20 transition-all group-hover:translate-x-1 group-hover:text-[#E94B35]" />
-                              </a>
-                            ))
-                          ) : (
-                            <p className="border-t border-black/10 py-4 text-sm text-black/30">No listed events</p>
-                          )}
+                    <div className="grid gap-10 md:grid-cols-3">
+                      {[
+                        ['Current Events', current],
+                        ['Upcoming', upcoming],
+                        ['Past', past],
+                      ].map(([label, events]) => (
+                        <div key={label as string}>
+                          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-black/35">{label as string}</h3>
+                          <div className="mt-5 space-y-0">
+                            {(events as DisplayEvent[]).length > 0 ? (
+                              (events as DisplayEvent[]).map((event) => (
+                                <a
+                                  href={event.href}
+                                  key={`${label}-${event.slug}`}
+                                  className="group flex items-center justify-between gap-4 border-t border-black/10 py-4 first:border-t-0"
+                                >
+                                  <div>
+                                    <p className="font-medium text-black/70 transition-colors group-hover:text-[#E94B35]">{event.title}</p>
+                                    <p className="mt-1 text-xs text-black/35">{event.date}</p>
+                                  </div>
+                                  <ArrowRight className="h-4 w-4 shrink-0 text-black/20 transition-all group-hover:translate-x-1 group-hover:text-[#E94B35]" />
+                                </a>
+                              ))
+                            ) : (
+                              <p className="border-t border-black/10 py-4 text-sm text-black/30">No listed events</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
