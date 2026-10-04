@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="RiGiD Design Workspace">
+    <link rel="icon" type="image/png" href="../../../assets/rigid-logo.png">
+    <title>
+        Design | RiGiD
+    </title>
+
+
+    <!-- =====================================================
+         FONTS
+    ====================================================== -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+
+    <!-- =====================================================
+         DESIGN CSS
+    ====================================================== -->
+
+    <link rel="stylesheet" href="design.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         APPLICATION WRAPPER
+    ====================================================== -->
+
+    <div class="design-app">
+
+
+        <!-- =================================================
+             TOP HEADER
+        ================================================== -->
+
+        <header class="design-header">
+
+
+            <div class="header-left">
+
+
+                <button class="back-button" id="backButton" type="button" aria-label="Return to personal workspace">
+
+                    <span class="back-icon">
+                        ←
+                    </span>
+
+                    <span>
+                        Workspace
+                    </span>
+
+                </button>
+
+
+                <div class="header-divider"></div>
+
+
+                <div class="page-identity">
+
+                    <span class="page-eyebrow">
+                        RiGiD / PERSONAL / DESIGN
+                    </span>
+
+                    <h1>
+                        Design Workspace
+                    </h1>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="header-right">
+
+
+                <span class="status-badge status-ongoing" id="designStatus">
+                    Loading
+                </span>
+
+
+                <span class="version-badge" id="designVersion">
+                    —
+                </span>
+
+
+                <button class="header-action" id="saveButton" type="button">
+                    Save
+                </button>
+
+
+                <button class="header-action" id="moreButton" type="button" aria-label="More options">
+                    ⋮
+                </button>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <main class="design-main">
+
+
+            <!-- =================================================
+                 DESIGN HERO
+            ================================================== -->
+
+            <section class="design-hero" aria-labelledby="designTitle">
+
+
+                <div class="hero-main">
+
+
+                    <div class="hero-label">
+                        DESIGN PROJECT
+                    </div>
+
+
+                    <div class="hero-title-row">
+
+
+                        <h2 id="designTitle">
+                            Loading Design...
+                        </h2>
+
+
+                        <span class="design-code" id="designCode">
+                            —
+                        </span>
+
+
+                    </div>
+
+
+                    <p class="hero-description" id="designDescription">
+                        Loading design information...
+                    </p>
+
+
+                    <div class="hero-meta">
+
+
+                        <div class="meta-item">
+
+                            <span class="meta-label">
+                                START DATE
+                            </span>
+
+                            <strong id="startDate">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <span class="meta-label">
+                                LAST UPDATED
+                            </span>
+
+                            <strong id="lastUpdated">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <span class="meta-label">
+                                DESIGNER
+                            </span>
+
+                            <strong id="designerName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <span class="meta-label">
+                                CURRENT VERSION
+                            </span>
+
+                            <strong id="currentVersion">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- PROGRESS -->
+
+                <aside class="hero-progress">
+
+
+                    <span class="section-label">
+                        DESIGN PROGRESS
+                    </span>
+
+
+                    <div class="progress-display">
+
+
+                        <div class="progress-ring" id="progressRing">
+
+                            <span id="progressValue">
+                                0%
+                            </span>
+
+                        </div>
+
+
+                        <div class="progress-info">
+
+                            <strong>
+                                Loading...
+                            </strong>
+
+                            <span>
+                                Loading design progress
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="progress-bar-container">
+
+                        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+
+                    </div>
+
+
+                    <div class="progress-footer">
+
+                        <span>
+                            0% completed
+                        </span>
+
+                        <span>
+                            0 iterations
+                        </span>
+
+                    </div>
+
+
+                </aside>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 QUICK DESIGN SUMMARY
+            ================================================== -->
+
+            <section class="summary-grid" aria-label="Design summary">
+
+
+                <article class="summary-card">
+
+                    <span class="summary-label">
+                        STATUS
+                    </span>
+
+                    <strong class="summary-value">
+                        Loading
+                    </strong>
+
+                    <span class="summary-detail">
+                        Current design state
+                    </span>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span class="summary-label">
+                        TASKS
+                    </span>
+
+                    <strong class="summary-value" id="taskSummary">
+                        0 / 0
+                    </strong>
+
+                    <span class="summary-detail">
+                        Tasks completed
+                    </span>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span class="summary-label">
+                        ITERATIONS
+                    </span>
+
+                    <strong class="summary-value" id="iterationSummary">
+                        0
+                    </strong>
+
+                    <span class="summary-detail">
+                        Design versions
+                    </span>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span class="summary-label">
+                        FILES
+                    </span>
+
+                    <strong class="summary-value" id="fileSummary">
+                        0
+                    </strong>
+
+                    <span class="summary-detail">
+                        Design assets
+                    </span>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span class="summary-label">
+                        RISKS
+                    </span>
+
+                    <strong class="summary-value" id="riskSummary">
+                        0
+                    </strong>
+
+                    <span class="summary-detail">
+                        Items requiring attention
+                    </span>
+
+                </article>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN FOUNDATION
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            FOUNDATION
+                        </span>
+
+                        <h3>
+                            Design Definition
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="foundation-grid">
+
+
+                    <!-- REQUIREMENTS -->
+
+                    <article class="workspace-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    REQUIREMENTS
+                                </span>
+
+                                <h4>
+                                    Design Requirements
+                                </h4>
+
+                            </div>
+
+
+                            <button class="card-add-button" type="button" data-section="requirements"
+                                aria-label="Add requirement">
+                                +
+                            </button>
+
+                        </div>
+
+
+                        <ul class="requirement-list" id="requirementList"></ul>
+
+
+                    </article>
+
+
+
+                    <!-- OBJECTIVES -->
+
+                    <article class="workspace-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    OBJECTIVES
+                                </span>
+
+                                <h4>
+                                    Design Goals
+                                </h4>
+
+                            </div>
+
+
+                            <button class="card-add-button" type="button" data-section="objectives"
+                                aria-label="Add design objective">
+                                +
+                            </button>
+
+                        </div>
+
+
+                        <div class="objective-list" id="objectiveList"></div>
+
+
+                    </article>
+
+
+
+                    <!-- CONSTRAINTS -->
+
+                    <article class="workspace-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    CONSTRAINTS
+                                </span>
+
+                                <h4>
+                                    Design Limitations
+                                </h4>
+
+                            </div>
+
+
+                            <button class="card-add-button" type="button" data-section="constraints"
+                                aria-label="Add constraint">
+                                +
+                            </button>
+
+                        </div>
+
+
+                        <ul class="constraint-list" id="constraintList"></ul>
+
+
+                    </article>
+
+
+
+                    <!-- TOOLS -->
+
+                    <article class="workspace-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    TOOLCHAIN
+                                </span>
+
+                                <h4>
+                                    Software & Tools
+                                </h4>
+
+                            </div>
+
+
+                            <button class="card-add-button" type="button" data-section="tools"
+                                aria-label="Add design tool">
+                                +
+                            </button>
+
+                        </div>
+
+
+                        <div class="tag-list" id="toolList"></div>
+
+
+                    </article>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 TECHNICAL SPECIFICATIONS
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            ENGINEERING DATA
+                        </span>
+
+                        <h3>
+                            Technical Specifications
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="specifications">
+                        + Add Specification
+                    </button>
+
+                </div>
+
+
+                <div class="specification-layout">
+
+
+                    <!-- SPECIFICATIONS -->
+
+                    <article class="workspace-card specification-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    DIMENSIONS & PARAMETERS
+                                </span>
+
+                                <h4>
+                                    Design Specifications
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="specification-grid" id="specificationGrid"></div>
+
+
+                    </article>
+
+
+
+                    <!-- MATERIALS -->
+
+                    <article class="workspace-card">
+
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="card-label">
+                                    MATERIALS
+                                </span>
+
+                                <h4>
+                                    Material Selection
+                                </h4>
+
+                            </div>
+
+
+                            <button class="card-add-button" type="button" data-section="materials"
+                                aria-label="Add material">
+                                +
+                            </button>
+
+                        </div>
+
+
+                        <div class="material-list" id="materialList"></div>
+
+
+                    </article>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 COMPONENTS
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            DESIGN ARCHITECTURE
+                        </span>
+
+                        <h3>
+                            Components
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="components">
+                        + Add Component
+                    </button>
+
+                </div>
+
+
+                <div class="component-grid" id="componentGrid"></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN ITERATIONS
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            DEVELOPMENT HISTORY
+                        </span>
+
+                        <h3>
+                            Design Iterations
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="iterations">
+                        + Add Iteration
+                    </button>
+
+                </div>
+
+
+                <div class="iteration-list" id="iterationList"></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN DECISIONS + RISKS
+            ================================================== -->
+
+            <section class="two-column-section">
+
+
+                <!-- DECISIONS -->
+
+                <article class="workspace-card large-card">
+
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                ENGINEERING LOG
+                            </span>
+
+                            <h4>
+                                Design Decisions
+                            </h4>
+
+                        </div>
+
+
+                        <button class="card-add-button" type="button" data-section="decisions"
+                            aria-label="Add design decision">
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <div class="decision-list" id="decisionList"></div>
+
+
+                </article>
+
+
+
+                <!-- RISKS -->
+
+                <article class="workspace-card">
+
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                ENGINEERING RISKS
+                            </span>
+
+                            <h4>
+                                Risks & Concerns
+                            </h4>
+
+                        </div>
+
+
+                        <button class="card-add-button" type="button" data-section="risks" aria-label="Add design risk">
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <div class="risk-list" id="riskList"></div>
+
+
+                </article>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 TASKS
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            WORK MANAGEMENT
+                        </span>
+
+                        <h3>
+                            Design Tasks
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="tasks">
+                        + Add Task
+                    </button>
+
+                </div>
+
+
+                <div class="two-column-section">
+
+
+                    <!-- TASK LIST -->
+
+                    <article class="workspace-card large-card">
+
+
+                        <div class="task-list" id="taskList"></div>
+
+
+                    </article>
+
+
+
+                    <!-- TASK SUMMARY -->
+
+                    <article class="workspace-card task-summary-card">
+
+
+                        <span class="card-label">
+                            TASK SUMMARY
+                        </span>
+
+                        <h4>
+                            Development Progress
+                        </h4>
+
+
+                        <div class="task-progress">
+
+
+                            <div class="task-progress-top">
+
+                                <span>
+                                    Completed
+                                </span>
+
+                                <strong>
+                                    0 / 0
+                                </strong>
+
+                            </div>
+
+
+                            <div class="task-progress-track">
+
+                                <div class="task-progress-fill" style="width: 0%;"></div>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="task-stat-grid">
+
+
+                            <div>
+
+                                <span>
+                                    COMPLETED
+                                </span>
+
+                                <strong>
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    REMAINING
+                                </span>
+
+                                <strong>
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    BLOCKED
+                                </span>
+
+                                <strong>
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    TOTAL
+                                </span>
+
+                                <strong>
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </article>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN FILES / ASSETS
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            DESIGN ASSETS
+                        </span>
+
+                        <h3>
+                            Files & Drawings
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="files">
+                        + Upload File
+                    </button>
+
+                </div>
+
+
+                <div class="file-grid" id="fileGrid"></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 REFERENCES + REVIEW
+            ================================================== -->
+
+            <section class="two-column-section">
+
+
+                <!-- REFERENCES -->
+
+                <article class="workspace-card">
+
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                REFERENCES
+                            </span>
+
+                            <h4>
+                                External Resources
+                            </h4>
+
+                        </div>
+
+
+                        <button class="card-add-button" type="button" data-section="references"
+                            aria-label="Add reference">
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <div class="reference-list" id="referenceList"></div>
+
+
+                </article>
+
+
+
+                <!-- REVIEW -->
+
+                <article class="workspace-card">
+
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                REVIEW
+                            </span>
+
+                            <h4>
+                                Design Review
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="review-grid">
+
+                        <button type="button" class="review-item" data-review-field="lastReview">
+                            <span>LAST REVIEW</span>
+                            <strong>—</strong>
+                        </button>
+
+                        <button type="button" class="review-item" data-review-field="reviewer">
+                            <span>REVIEWER</span>
+                            <strong>—</strong>
+                        </button>
+
+                        <button type="button" class="review-item" data-review-field="result">
+                            <span>RESULT</span>
+                            <strong>—</strong>
+                        </button>
+
+                        <button type="button" class="review-item" data-review-field="nextReview">
+                            <span>NEXT REVIEW</span>
+                            <strong>—</strong>
+                        </button>
+
+                    </div>
+
+
+                    <div class="review-note">
+
+                        <span class="review-note-icon">
+                            !
+                        </span>
+
+                        <p>
+                            No review notes added.
+                        </p>
+
+                    </div>
+
+
+                </article>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 TESTING / VALIDATION
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            VALIDATION
+                        </span>
+
+                        <h3>
+                            Testing & Verification
+                        </h3>
+
+                    </div>
+
+
+                    <button class="section-action" type="button" data-section="tests">
+                        + Add Test
+                    </button>
+
+                </div>
+
+
+                <div class="validation-grid" id="testList"></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN NOTES
+            ================================================== -->
+
+            <section class="section-block">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            DESIGN LOG
+                        </span>
+
+                        <h3>
+                            Notes & Observations
+                        </h3>
+
+                    </div>
+
+
+                    <span class="notes-status">
+                        Not saved
+                    </span>
+
+                </div>
+
+
+                <textarea class="design-notes" id="designNotes"
+                    placeholder="Record observations, design ideas, problems, decisions, test results, manufacturing concerns or future improvements..."></textarea>
+
+
+                <div class="notes-footer">
+
+
+                    <span>
+
+                        Last saved:
+
+                        <strong id="notesSaved">
+                            Not saved
+                        </strong>
+
+                    </span>
+
+
+                    <span>
+                        Saved with the Design record
+                    </span>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DESIGN TIMELINE
+            ================================================== -->
+
+            <section class="section-block" id="designTimelineSection">
+
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            DEVELOPMENT HISTORY
+                        </span>
+
+                        <h3>
+                            Design Timeline
+                        </h3>
+
+                    </div>
+
+
+                    <button class="timeline-section-action" type="button" id="addTimelineButton">
+                        + Add Timeline Entry
+                    </button>
+
+                </div>
+
+
+                <div class="design-timeline" id="designTimeline"></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 FINAL DESIGN INFORMATION
+            ================================================== -->
+
+            <section class="design-footer-panel">
+
+
+                <div>
+
+
+                    <span class="section-label">
+                        DESIGN RECORD
+                    </span>
+
+
+                    <h3>
+                        Design Workspace
+                    </h3>
+
+
+                    <p>
+                        This workspace contains the requirements,
+                        specifications, development history,
+                        engineering decisions, validation status
+                        and supporting assets associated with this
+                        design.
+                    </p>
+
+
+                </div>
+
+
+                <div class="footer-actions">
+
+
+                    <button class="secondary-button" type="button" id="archiveButton">
+                        Archive Design
+                    </button>
+
+
+                    <button class="primary-button" type="button" id="completeButton">
+                        Mark as Complete
+                    </button>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="design-page-footer">
+
+
+            <span>
+                RiGiD
+            </span>
+
+
+            <span>
+                Design Workspace
+            </span>
+
+
+            <span>
+
+                <span id="footerVersion">
+                    —
+                </span>
+
+            </span>
+
+
+        </footer>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         DESIGN JAVASCRIPT
+    ====================================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- RiGiD Supabase Client -->
+    <script src="../../../supabase-client.js"></script>
+    <script src="../../../google-drive-reconnect.js"></script>
+    <script src="design.js?v=20260906-timeline"></script>
+
+
+</body>
+
+</html>
