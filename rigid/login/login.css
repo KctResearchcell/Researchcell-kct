@@ -1160,3 +1160,45 @@ select.field-input:focus-visible {
 .orange {
     color: orange;
 }
+
+/* =========================================================================
+   GOOGLE DRIVE CONNECTION (required before Request Access)
+   ========================================================================= */
+
+.google-drive-connection-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: var(--bg-alt);
+}
+
+.google-drive-info strong {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.google-drive-info p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.5;
+    color: var(--soft);
+    margin-top: 4px;
+}
+
+.google-drive-connection-box.google-drive-connected {
+    border-style: solid;
+    border-color: #16a34a;
+}
+
+.google-drive-connection-box.google-drive-connected strong {
+    color: #16a34a;
+}
+
+#googleRequestAccessHint {
+    text-align: center;
+    margin-bottom: -4px;
+}
