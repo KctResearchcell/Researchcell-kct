@@ -370,12 +370,15 @@
      GOOGLE DRIVE CONNECTION
      ================================================= -->
 
-                    <div id="googleDriveConnectionBox" class="google-drive-connection-box hidden">
+                    <div id="googleDriveConnectionBox" class="google-drive-connection-box">
 
                         <div class="google-drive-info">
 
                             <strong>
                                 Google Drive
+                                <span class="required-mark">
+                                    *
+                                </span>
                             </strong>
 
                             <p>
@@ -395,7 +398,12 @@
                          GOOGLE REQUEST ACCESS
                          ================================================= -->
 
-                    <button id="googleRequestAccessBtn" type="button" class="btn-primary w-full justify-center">
+                    <p id="googleRequestAccessHint" class="field-hint">
+                        Connect Google Drive to enable Request Access.
+                    </p>
+
+                    <button id="googleRequestAccessBtn" type="button" class="btn-primary w-full justify-center" disabled
+                        title="Connect Google Drive first">
                         Request Access
                     </button>
 

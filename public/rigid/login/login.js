@@ -1543,7 +1543,7 @@ async function resendVerificationLink() {
 
 
     button.disabled =
-      false;
+      true;
 
     button.textContent =
       "Resend verification link";
@@ -1893,6 +1893,8 @@ async function submitAccessRequest(
 async function requestAccess(event) {
 
   event.preventDefault();
+
+  void checkGoogleDriveConnection();
 
   clearMessage();
 
@@ -2524,18 +2526,10 @@ async function signUpWithGoogle() {
 
        options: {
          redirectTo:
-          LOGIN_CONFIG.LOGIN_REDIRECT_URL,
+          LOGIN_CONFIG.LOGIN_REDIRECT_URL
 
-        // Request only access to files RiGiD creates or opens itself.
-        scopes:
-          "https://www.googleapis.com/auth/drive.file",
-
-        // The existing Edge Function completes the durable, server-side
-        // Drive connection after the Supabase OAuth callback.
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent"
-        }
+        // Google Drive is connected separately through the
+        // "Connect Google Drive" button (connect-google-drive Edge Function).
       }
 
     });
@@ -2609,7 +2603,48 @@ async function signUpWithGoogle() {
    GOOGLE DRIVE CONNECTION UI
    ========================================================================= */
 
+let googleDriveIsConnected = false;
+
+
+/*
+ * Request Access is only allowed after Google Drive is connected.
+ * A locked button (already submitted / pending) is never re-enabled.
+ */
+function updateGoogleRequestAccessGate() {
+
+  const button =
+    el("googleRequestAccessBtn");
+
+  const hint =
+    el("googleRequestAccessHint");
+
+  if (hint) {
+    hint.classList.toggle(
+      "hidden",
+      googleDriveIsConnected
+    );
+  }
+
+  if (!button || button.dataset.locked === "true") {
+    return;
+  }
+
+  button.disabled =
+    !googleDriveIsConnected;
+
+  button.title =
+    googleDriveIsConnected
+      ? ""
+      : "Connect Google Drive first";
+
+}
+
+
 function setGoogleDriveConnectedUI() {
+
+  googleDriveIsConnected = true;
+
+  updateGoogleRequestAccessGate();
 
   const box =
     el("googleDriveConnectionBox");
@@ -2647,6 +2682,10 @@ function setGoogleDriveConnectedUI() {
 
 
 function setGoogleDriveDisconnectedUI() {
+
+  googleDriveIsConnected = false;
+
+  updateGoogleRequestAccessGate();
 
   const box =
     el("googleDriveConnectionBox");
@@ -3365,15 +3404,15 @@ async function checkExistingSession() {
       el("tabSignup")?.click();
 
 
-      const driveConnection =
-        await startAutomaticGoogleDriveReconnect(session);
+      /*
+       * Google sign-in and Google Drive connection are separate.
+       * DO NOT start Drive OAuth automatically; the user connects
+       * Drive with the "Connect Google Drive" button, and
+       * Request Access stays disabled until Drive is connected.
+       */
+      await setupGoogleUser(user);
 
-      // The existing secure Drive OAuth flow has redirected to Google.
-      if (driveConnection?.redirected) {
-        return;
-      }
-
-      await setupGoogleUser(user, driveConnection);
+      await checkGoogleDriveConnection();
 
       return;
     }
@@ -3810,13 +3849,16 @@ function showGoogleProfileSetup(
 
   if (button) {
 
-    button.disabled =
-      false;
+    button.dataset.locked =
+      "false";
 
     button.textContent =
       "Request Access";
 
   }
+
+
+  updateGoogleRequestAccessGate();
 
 
   clearMessage();
@@ -3891,6 +3933,9 @@ function showGooglePendingState(
 
 
   if (button) {
+
+    button.dataset.locked =
+      "true";
 
     button.disabled =
       true;
@@ -3989,6 +4034,21 @@ async function submitGoogleAccessRequest() {
 
     showMessage(
       "Your Google session has expired. Please sign in again."
+    );
+
+    return;
+
+  }
+
+
+  const driveConnected =
+    await checkGoogleDriveConnection();
+
+
+  if (!driveConnected) {
+
+    showMessage(
+      "Connect Google Drive before requesting access."
     );
 
     return;
@@ -4233,6 +4293,9 @@ async function submitGoogleAccessRequest() {
     await sb.auth.signOut();
 
 
+    button.dataset.locked =
+      "true";
+
     button.disabled =
       true;
 
@@ -4268,11 +4331,10 @@ async function submitGoogleAccessRequest() {
       "Request Submitted"
     ) {
 
-      button.disabled =
-        false;
-
       button.textContent =
         "Request Access";
+
+      updateGoogleRequestAccessGate();
 
     }
 
@@ -4490,11 +4552,9 @@ document.addEventListener(
        Existing session
        ----------------------------------------------------- */
 
-    // A declined Drive consent is already explained by the callback. Do not
-    // immediately launch another OAuth redirect in the same page visit.
-    if (googleDriveCallbackStatus !== "error") {
-      await checkExistingSession();
-    }
+    // Drive OAuth is never started automatically, so the session
+    // check is safe even after a declined Drive consent.
+    await checkExistingSession();
 
 
     /* -----------------------------------------------------
@@ -4521,6 +4581,13 @@ if (googleSignupButton) {
   googleSignupButton.onclick = signUpWithGoogle;
 
 }
+
+
+    el("connectGoogleDriveBtn")
+      ?.addEventListener(
+        "click",
+        connectGoogleDrive
+      );
 
 
     el("googleRequestAccessBtn")
