@@ -439,9 +439,11 @@ async function loadForumData() {
     domains =
       domainsResult.data || [];
 
-    populateForumSelect(
-      "signupForum"
-    );
+    if (el("signupForum")) {
+      populateForumSelect(
+        "signupForum"
+      );
+    }
 
     populateForumSelect(
       "googleForum"
@@ -3573,17 +3575,6 @@ async function setupGoogleUser(
     profile.status === "pending"
   ) {
 
-    showMessage(
-      driveConnection?.connected
-        ? "Google sign-in and Google Drive authorization are complete. Your account is waiting for admin approval."
-        : "Google sign-in is complete, but Google Drive permission is required for RiGiD file storage. Please try Continue with Google again and approve Drive access."
-    );
-
-    return;
-
-    /* Legacy profile-setup handling below is intentionally unreachable for
-       the simplified Google-only signup. */
-
     const [
       forumResult,
       teamResult,
@@ -4473,6 +4464,10 @@ document.addEventListener(
 
     initTabs();
 
+    initForumSelection();
+
+    await loadForumData();
+
     /* -----------------------------------------------------
        Auth listener
        ----------------------------------------------------- */
@@ -4526,6 +4521,20 @@ if (googleSignupButton) {
   googleSignupButton.onclick = signUpWithGoogle;
 
 }
+
+
+    el("googleRequestAccessBtn")
+      ?.addEventListener(
+        "click",
+        submitGoogleAccessRequest
+      );
+
+
+    el("googleUseDifferentAccountBtn")
+      ?.addEventListener(
+        "click",
+        useDifferentGoogleAccount
+      );
 
 
   }
