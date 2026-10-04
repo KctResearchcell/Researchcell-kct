@@ -1,0 +1,3817 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Prototype | RiGiD</title>
+
+<link
+    rel="stylesheet"
+    href="prototype.css"
+>
+<link rel="icon" type="image/png" href="../../../assets/rigid-logo.png">
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     PROTOTYPE HEADER
+===================================================== -->
+
+<header class="prototype-header">
+
+    <div class="prototype-header-workspace">
+
+        <button
+            class="prototype-workspace-button"
+            id="backToWorkspace"
+            type="button"
+            aria-label="Return to workspace"
+        >
+            <span class="prototype-workspace-icon">←</span>
+            <span>Workspace</span>
+        </button>
+
+    </div>
+
+    <div class="prototype-header-divider" aria-hidden="true"></div>
+
+    <div class="prototype-brand">
+
+        <div class="prototype-brand-top">
+
+            <span class="prototype-badge">PROTOTYPE</span>
+
+            <button
+                class="prototype-status"
+                id="prototypeStatus"
+                type="button"
+            >
+                ● BUILDING
+            </button>
+
+            <span
+                class="prototype-version"
+                id="prototypeVersion"
+            >
+                V2
+            </span>
+
+            <div
+                class="prototype-tags"
+                id="prototypeTags"
+                aria-label="Prototype tags"
+            >
+                <span>TAGS</span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+        </div>
+
+        <h1 id="prototypeTitle"></h1>
+
+        <p
+            class="prototype-description"
+            id="prototypeDescription"
+        >
+            Physical implementation of the proposed system for functional testing and validation.
+        </p>
+
+    </div>
+
+    <div class="prototype-live">
+
+        <div class="prototype-date">
+            <span id="prototypeDate">23 AUG 2026</span>
+            <strong id="prototypeClock">05:30:00 PM</strong>
+        </div>
+
+        <div class="prototype-meta">
+
+            <div>
+                <label>OWNER</label>
+                <strong id="prototypeOwner">You</strong>
+            </div>
+
+            <div>
+                <label>STARTED</label>
+                <strong id="prototypeStarted">01 AUG 2026</strong>
+            </div>
+
+            <div>
+                <label>LAST UPDATED</label>
+                <strong id="prototypeLastUpdated">23 AUG 2026</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+<!-- =====================================================
+     PROTOTYPE NAVIGATION
+===================================================== -->
+
+<nav class="prototype-navigation">
+
+  
+<button
+    class="prototype-nav-item active"
+    data-section="prototypeOverview"
+    type="button"
+>
+    Overview
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeDesign"
+    type="button"
+>
+    Design
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeBuild"
+    type="button"
+>
+    Build
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeComponents"
+    type="button"
+>
+    Components
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeTesting"
+    type="button"
+>
+    Testing
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeIterations"
+    type="button"
+>
+    Iterations
+</button>
+
+
+<button
+    class="prototype-nav-item"
+    data-section="prototypeFiles"
+    type="button"
+>
+    Files
+</button>
+  
+
+</nav>
+
+<!-- =====================================================
+     LOADING / ERROR STATE
+     Shown while the initial Supabase fetch is in flight.
+     Hidden automatically once real data loads
+     (see prototype.js showLoadingState/hideLoadingState).
+     NOTE: needs .prototype-loading-state /
+     .prototype-error-state / a generic .hidden { display:none }
+     utility added in the CSS pass — see project notes.
+===================================================== -->
+
+<div
+    id="prototypeLoadingState"
+    class="prototype-loading-state"
+    role="status"
+    aria-live="polite"
+>
+    Loading prototype workspace…
+</div>
+
+<div
+    id="prototypeErrorState"
+    class="prototype-error-state hidden"
+    role="alert"
+></div>
+
+<main class="prototype-container" id="prototypeWorkspace">
+
+<!-- =====================================================
+     OVERVIEW
+===================================================== -->
+
+<section
+    id="prototypeOverview"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            PROTOTYPE OVERVIEW
+        </span>
+
+        <h2>
+            Prototype Control Center
+        </h2>
+
+    </div>
+
+
+    <button
+        class="outline-button"
+        id="editPrototype"
+        type="button"
+    >
+        Edit
+    </button>
+
+</div>
+
+
+
+<div class="overview-grid">
+
+
+    <!-- PROGRESS -->
+
+    <article class="prototype-card progress-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    DEVELOPMENT PROGRESS
+                </span>
+
+                <h3>
+                    Prototype completion
+                </h3>
+
+            </div>
+
+
+            <button
+                id="editPrototypeProgress"
+                class="progress-percentage"
+                type="button"
+            >
+                <strong id="prototypeProgress">
+                    68%
+                </strong>
+            </button>
+
+        </div>
+
+
+        <div class="progress-track">
+
+            <span
+                id="prototypeProgressBar"
+                style="width:68%"
+            ></span>
+
+        </div>
+
+
+        <div class="progress-footer">
+
+            <button
+                id="updatePrototypeProgress"
+                class="text-button"
+                type="button"
+            >
+                Update progress
+            </button>
+
+
+            <span id="prototypeProgressStatus">
+                Build phase
+            </span>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- CURRENT VERSION -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    CURRENT VERSION
+                </span>
+
+                <h3>
+                    Active prototype
+                </h3>
+
+            </div>
+
+
+            <button
+                class="text-button"
+                id="editVersion"
+                type="button"
+            >
+                Edit
+            </button>
+
+        </div>
+
+
+        <div class="version-display">
+
+            <strong id="currentVersion">
+                V2
+            </strong>
+
+
+            <div>
+
+                <span id="currentVersionTitle">
+                    Improved enclosure
+                </span>
+
+                <small id="currentVersionDescription">
+                    Updated after V1 testing
+                </small>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- NEXT ACTION -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    NEXT ACTION
+                </span>
+
+                <h3>
+                    Immediate work
+                </h3>
+
+            </div>
+
+
+            <button
+                class="text-button"
+                id="editPrototypeNext"
+                type="button"
+            >
+                Edit
+            </button>
+
+        </div>
+
+
+        <div
+            class="next-action"
+            id="prototypeNextAction"
+        >
+
+            <strong id="prototypeNextActionTitle">
+                Complete thermal testing
+            </strong>
+
+            <span id="prototypeNextActionDue">
+                Due: 27 AUG
+            </span>
+
+        </div>
+
+    </article>
+
+</div>
+
+
+
+<!-- OBJECTIVE -->
+
+<article class="prototype-card objective-card">
+
+    <div class="card-header">
+
+        <div>
+
+            <span class="card-label">
+                PURPOSE
+            </span>
+
+            <h3>
+                Prototype Objective
+            </h3>
+
+        </div>
+
+
+        <button
+            class="text-button"
+            id="editObjective"
+            type="button"
+        >
+            Edit
+        </button>
+
+    </div>
+
+
+    <div
+        id="prototypeObjective"
+        class="editable-content"
+    >
+
+        <p>
+            Describe what this prototype is intended
+            to demonstrate, test or validate.
+        </p>
+
+    </div>
+
+</article>
+  
+
+</section>
+
+<!-- =====================================================
+     DESIGN
+===================================================== -->
+
+<section
+    id="prototypeDesign"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            DESIGN
+        </span>
+
+        <h2>
+            Design &amp; Specifications
+        </h2>
+
+    </div>
+
+
+    <button
+        class="outline-button"
+        id="editDesign"
+        type="button"
+    >
+        Edit
+    </button>
+
+</div>
+
+
+
+<div class="design-grid">
+
+
+    <!-- DESIGN CONCEPT -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    CONCEPT
+                </span>
+
+                <h3>
+                    Design Concept
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="designConcept"
+            class="editable-content"
+        >
+
+            <p>
+                Record the engineering concept behind
+                this prototype and explain why this
+                architecture was selected.
+            </p>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- SPECIFICATIONS -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    SPECIFICATIONS
+                </span>
+
+                <h3>
+                    Key Parameters
+                </h3>
+
+            </div>
+
+
+            <button
+                class="text-button"
+                id="addSpecification"
+                type="button"
+            >
+                + Add
+            </button>
+
+        </div>
+
+
+        <div
+            class="specification-list"
+            id="specificationList"
+        >
+
+            <div class="specification-row">
+
+                <span>
+                    Rated Power
+                </span>
+
+                <strong>
+                    1.2 kW
+                </strong>
+
+            </div>
+
+
+            <div class="specification-row">
+
+                <span>
+                    Rated Voltage
+                </span>
+
+                <strong>
+                    48 V
+                </strong>
+
+            </div>
+
+
+            <div class="specification-row">
+
+                <span>
+                    Rated Speed
+                </span>
+
+                <strong>
+                    850 RPM
+                </strong>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</div>
+
+
+
+<!-- DESIGN DECISIONS -->
+
+<article class="prototype-card design-notes-card">
+
+    <div class="card-header">
+
+        <div>
+
+            <span class="card-label">
+                ENGINEERING NOTES
+            </span>
+
+            <h3>
+                Design Decisions
+            </h3>
+
+        </div>
+
+
+        <button
+            class="text-button"
+            id="addDesignDecision"
+            type="button"
+        >
+            + Add
+        </button>
+
+    </div>
+
+
+    <div
+        class="design-decision-list"
+        id="designDecisionList"
+    >
+
+        <div class="design-decision">
+
+            <strong>
+                Why was this design selected?
+            </strong>
+
+            <p>
+                Record important design decisions,
+                alternatives considered and the
+                reasoning behind the final choice.
+            </p>
+
+        </div>
+
+    </div>
+
+</article>
+  
+
+</section>
+
+<!-- =====================================================
+     BUILD LOG
+===================================================== -->
+
+<section
+    id="prototypeBuild"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            FABRICATION
+        </span>
+
+        <h2>
+            Build Log
+        </h2>
+
+    </div>
+
+
+    <button
+        class="primary-button"
+        id="addBuildEntry"
+        type="button"
+    >
+        + Build Entry
+    </button>
+
+</div>
+
+
+
+<div class="build-layout">
+
+
+    <div
+        class="build-progress-card"
+        id="buildProgressCard"
+    >
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    BUILD STATUS
+                </span>
+
+                <h3>
+                    Fabrication Progress
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="build-progress-display">
+
+            <strong id="buildProgressPercentage">
+                68%
+            </strong>
+
+            <span id="buildProgressLabel">
+                Current build progress
+            </span>
+
+        </div>
+
+
+        <div class="progress-track">
+
+            <span
+                id="buildProgressBar"
+                style="width:68%"
+            ></span>
+
+        </div>
+
+    </div>
+
+
+
+    <div
+        class="build-log-list"
+        id="buildLogList"
+    >
+
+        <article class="build-log-entry">
+
+            <div class="build-log-date">
+                23 AUG 2026
+            </div>
+
+            <div class="build-log-content">
+
+                <strong>
+                    Improved enclosure assembly
+                </strong>
+
+                <p>
+                    Revised the enclosure and improved
+                    internal component arrangement.
+                </p>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     COMPONENTS
+===================================================== -->
+
+<section
+    id="prototypeComponents"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            HARDWARE
+        </span>
+
+        <h2>
+            Components &amp; Materials
+        </h2>
+
+    </div>
+
+
+    <button
+        class="primary-button"
+        id="addComponent"
+        type="button"
+    >
+        + Component
+    </button>
+
+</div>
+
+
+
+<div
+    class="component-grid"
+    id="prototypeComponentList"
+>
+
+    <article class="component-card">
+
+        <div class="component-card-top">
+
+            <strong>
+                Power Electronics Module
+            </strong>
+
+            <span>
+                ACTIVE
+            </span>
+
+        </div>
+
+        <p>
+            Main power conversion and protection
+            electronics.
+        </p>
+
+        <small>
+            Quantity: 1
+        </small>
+
+    </article>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     TESTING
+===================================================== -->
+
+<section
+    id="prototypeTesting"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            VALIDATION
+        </span>
+
+        <h2>
+            Testing &amp; Measurements
+        </h2>
+
+    </div>
+
+
+    <button
+        class="primary-button"
+        id="addPrototypeTest"
+        type="button"
+    >
+        + Test
+    </button>
+
+</div>
+
+
+
+<div class="test-summary-grid">
+
+    <article class="test-summary-card">
+
+        <strong id="prototypeTestTotal">
+            7
+        </strong>
+
+        <span>
+            TESTS
+        </span>
+
+    </article>
+
+
+    <article class="test-summary-card passed">
+
+        <strong id="prototypeTestPassed">
+            5
+        </strong>
+
+        <span>
+            PASSED
+        </span>
+
+    </article>
+
+
+    <article class="test-summary-card failed">
+
+        <strong id="prototypeTestFailed">
+            1
+        </strong>
+
+        <span>
+            FAILED
+        </span>
+
+    </article>
+
+
+    <article class="test-summary-card pending">
+
+        <strong id="prototypeTestPending">
+            1
+        </strong>
+
+        <span>
+            PENDING
+        </span>
+
+    </article>
+
+</div>
+
+
+
+<div
+    class="prototype-test-list"
+    id="prototypeTestList"
+>
+
+    <article class="prototype-test passed">
+
+        <div class="test-result-icon">
+            ✓
+        </div>
+
+        <div class="prototype-test-info">
+
+            <strong>
+                No-load functional test
+            </strong>
+
+            <p>
+                Prototype starts and all major
+                subsystems respond correctly.
+            </p>
+
+        </div>
+
+        <span class="test-result-badge passed">
+            PASSED
+        </span>
+
+    </article>
+
+
+    <article class="prototype-test failed">
+
+        <div class="test-result-icon">
+            !
+        </div>
+
+        <div class="prototype-test-info">
+
+            <strong>
+                Thermal test
+            </strong>
+
+            <p>
+                Temperature increased beyond the
+                expected operating range.
+            </p>
+
+        </div>
+
+        <span class="test-result-badge failed">
+            FAILED
+        </span>
+
+    </article>
+
+
+    <article class="prototype-test pending">
+
+        <div class="test-result-icon">
+            •
+        </div>
+
+        <div class="prototype-test-info">
+
+            <strong>
+                Full-load endurance
+            </strong>
+
+            <p>
+                To be performed after thermal
+                improvements.
+            </p>
+
+        </div>
+
+        <span class="test-result-badge pending">
+            PENDING
+        </span>
+
+    </article>
+
+</div>
+
+
+
+<!-- MEASUREMENTS -->
+
+<article class="prototype-card measurements-card">
+
+    <div class="card-header">
+
+        <div>
+
+            <span class="card-label">
+                MEASUREMENTS
+            </span>
+
+            <h3>
+                Test Data
+            </h3>
+
+        </div>
+
+
+        <button
+            class="text-button"
+            id="addMeasurement"
+            type="button"
+        >
+            + Measurement
+        </button>
+
+    </div>
+
+
+    <div class="measurement-table-wrapper">
+
+        <table class="measurement-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Parameter
+                    </th>
+
+                    <th>
+                        Expected
+                    </th>
+
+                    <th>
+                        Measured
+                    </th>
+
+                    <th>
+                        Unit
+                    </th>
+
+                    <th>
+                        Result
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="measurementTableBody">
+
+                <tr>
+
+                    <td>
+                        Output Voltage
+                    </td>
+
+                    <td>
+                        48
+                    </td>
+
+                    <td>
+                        47.8
+                    </td>
+
+                    <td>
+                        V
+                    </td>
+
+                    <td>
+
+                        <span class="measurement-pass">
+                            PASS
+                        </span>
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Output Current
+                    </td>
+
+                    <td>
+                        20
+                    </td>
+
+                    <td>
+                        18.6
+                    </td>
+
+                    <td>
+                        A
+                    </td>
+
+                    <td>
+
+                        <span class="measurement-pass">
+                            PASS
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</article>
+  
+
+</section>
+
+<!-- =====================================================
+     ITERATIONS
+===================================================== -->
+
+<section
+    id="prototypeIterations"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            DEVELOPMENT HISTORY
+        </span>
+
+        <h2>
+            Prototype Iterations
+        </h2>
+
+    </div>
+
+
+    <button
+        class="primary-button"
+        id="addIteration"
+        type="button"
+    >
+        + Iteration
+    </button>
+
+</div>
+
+
+
+<div
+    class="iteration-list"
+    id="iterationList"
+>
+
+    <article class="iteration-card current">
+
+        <div class="iteration-version">
+            V2
+        </div>
+
+
+        <div class="iteration-content">
+
+            <div class="iteration-top">
+
+                <strong>
+                    Current Prototype
+                </strong>
+
+                <span>
+                    23 AUG 2026
+                </span>
+
+            </div>
+
+
+            <p>
+                Improved enclosure, revised wiring
+                and updated power electronics.
+            </p>
+
+
+            <div class="iteration-changes">
+
+                <span>
+                    + Better thermal management
+                </span>
+
+                <span>
+                    + Improved wiring
+                </span>
+
+                <span>
+                    + New protection stage
+                </span>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <article class="iteration-card">
+
+        <div class="iteration-version">
+            V1
+        </div>
+
+
+        <div class="iteration-content">
+
+            <div class="iteration-top">
+
+                <strong>
+                    First Prototype
+                </strong>
+
+                <span>
+                    18 AUG 2026
+                </span>
+
+            </div>
+
+
+            <p>
+                Initial working prototype used for
+                subsystem-level validation.
+            </p>
+
+
+            <div class="iteration-changes">
+
+                <span>
+                    Initial architecture
+                </span>
+
+                <span>
+                    Initial hardware
+                </span>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     FAILURES / MODIFICATIONS
+===================================================== -->
+
+<section class="prototype-section">
+
+  
+<div class="two-column-grid">
+
+
+    <!-- FAILURES -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    LEARNING FROM FAILURE
+                </span>
+
+                <h3>
+                    Problems &amp; Failures
+                </h3>
+
+            </div>
+
+
+            <button
+                class="text-button"
+                id="addFailure"
+                type="button"
+            >
+                + Add
+            </button>
+
+        </div>
+
+
+        <div
+            class="failure-list"
+            id="failureList"
+        >
+
+            <div class="failure-item">
+
+                <span class="failure-icon">
+                    !
+                </span>
+
+
+                <div>
+
+                    <strong>
+                        Excessive thermal rise
+                    </strong>
+
+                    <p>
+                        Temperature increased during
+                        extended operation.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- MODIFICATIONS -->
+
+    <article class="prototype-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-label">
+                    MODIFICATIONS
+                </span>
+
+                <h3>
+                    Changes Made
+                </h3>
+
+            </div>
+
+
+            <button
+                class="text-button"
+                id="addModification"
+                type="button"
+            >
+                + Add
+            </button>
+
+        </div>
+
+
+        <div
+            class="modification-list"
+            id="modificationList"
+        >
+
+            <div class="modification-item">
+
+                <span class="modification-number">
+                    01
+                </span>
+
+
+                <div>
+
+                    <strong>
+                        Improved heat dissipation
+                    </strong>
+
+                    <p>
+                        Added additional thermal
+                        management to the enclosure.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     MEDIA / FILES
+===================================================== -->
+
+<section
+    id="prototypeFiles"
+    class="prototype-section"
+>
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            RESOURCES
+        </span>
+
+        <h2>
+            Images, Videos &amp; Files
+        </h2>
+
+    </div>
+
+
+    <div class="heading-actions">
+
+        <button
+            class="outline-button"
+            id="addPrototypeLink"
+            type="button"
+        >
+            + Link
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="uploadPrototypeFile"
+            type="button"
+        >
+            + Upload
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<div
+    class="prototype-upload-zone"
+    id="prototypeUploadZone"
+    tabindex="0"
+    role="button"
+>
+
+    <strong>
+        Add prototype resources
+    </strong>
+
+    <p>
+        Upload photographs, videos, CAD files,
+        schematics, PDFs, documents, datasets,
+        source files or any other project material.
+    </p>
+
+    <span>
+        Drag &amp; drop or click to browse
+    </span>
+
+</div>
+
+
+
+<input
+    type="file"
+    id="prototypeFileInput"
+    multiple
+    hidden
+>
+
+
+
+<!-- MEDIA -->
+
+<div
+    class="prototype-media-grid"
+    id="prototypeMediaGrid"
+>
+
+    <article class="prototype-media-card image-card">
+
+        <div class="media-placeholder">
+            IMAGE
+        </div>
+
+
+        <div class="media-info">
+
+            <strong>
+                Prototype_V2_Front.jpg
+            </strong>
+
+            <span>
+                Prototype photograph
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <article class="prototype-media-card">
+
+        <div class="media-placeholder video">
+            VIDEO
+        </div>
+
+
+        <div class="media-info">
+
+            <strong>
+                First_Run_Test.mp4
+            </strong>
+
+            <span>
+                Initial test video
+            </span>
+
+        </div>
+
+    </article>
+
+</div>
+
+
+
+<!-- FILE LIST -->
+
+<div
+    class="prototype-file-list"
+    id="prototypeFileList"
+>
+
+    <article class="prototype-file">
+
+        <div class="prototype-file-icon">
+            CAD
+        </div>
+
+
+        <div class="prototype-file-info">
+
+            <strong>
+                Prototype_V2.step
+            </strong>
+
+            <span>
+                CAD · 8.2 MB
+            </span>
+
+        </div>
+
+
+        <button type="button">
+            Open
+        </button>
+
+    </article>
+
+
+    <article class="prototype-file">
+
+        <div class="prototype-file-icon">
+            PDF
+        </div>
+
+
+        <div class="prototype-file-info">
+
+            <strong>
+                Test_Report_V1.pdf
+            </strong>
+
+            <span>
+                PDF · 2.1 MB
+            </span>
+
+        </div>
+
+
+        <button type="button">
+            Open
+        </button>
+
+    </article>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     FUTURE IMPROVEMENTS
+===================================================== -->
+
+<section class="prototype-section">
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            NEXT ITERATION
+        </span>
+
+        <h2>
+            Future Improvements
+        </h2>
+
+    </div>
+
+
+    <button
+        class="outline-button"
+        id="addImprovement"
+        type="button"
+    >
+        + Improvement
+    </button>
+
+</div>
+
+
+
+<div
+    class="improvement-grid"
+    id="improvementGrid"
+>
+
+    <article class="improvement-card">
+
+        <span>
+            HIGH PRIORITY
+        </span>
+
+        <h3>
+            Improve thermal performance
+        </h3>
+
+        <p>
+            Reduce temperature rise during continuous
+            operation.
+        </p>
+
+    </article>
+
+
+    <article class="improvement-card">
+
+        <span>
+            MEDIUM PRIORITY
+        </span>
+
+        <h3>
+            Reduce prototype size
+        </h3>
+
+        <p>
+            Optimize the enclosure and internal
+            component arrangement.
+        </p>
+
+    </article>
+
+
+    <article class="improvement-card">
+
+        <span>
+            FUTURE
+        </span>
+
+        <h3>
+            Automate data acquisition
+        </h3>
+
+        <p>
+            Integrate automated measurement and
+            logging for future testing.
+        </p>
+
+    </article>
+
+</div>
+  
+
+</section>
+
+<!-- =====================================================
+     FINAL PROTOTYPE OUTCOME
+===================================================== -->
+
+<section class="prototype-section">
+
+  
+<div class="section-heading">
+
+    <div>
+
+        <span class="section-label">
+            FINAL RESULT
+        </span>
+
+        <h2>
+            Prototype Outcome
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<article class="prototype-card outcome-card">
+
+    <textarea
+        id="prototypeOutcome"
+        placeholder="Record the final prototype performance, what worked, what failed, measured results and what was ultimately achieved."
+    ></textarea>
+
+
+    <div class="card-footer">
+
+        <span>
+            Complete this when the prototype reaches
+            its final stage.
+        </span>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeOutcome"
+            type="button"
+        >
+            Save Outcome
+        </button>
+
+    </div>
+
+</article>
+  
+
+</section>
+
+</main>
+
+<!-- =====================================================
+     PROTOTYPE DETAILS MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeDetailsModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                PROTOTYPE
+            </span>
+
+            <h2>
+                Edit Prototype
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeDetailsModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Prototype Title
+
+            <input
+                type="text"
+                id="prototypeDetailsTitle"
+                placeholder="Enter prototype title"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeDetailsDescription"
+                placeholder="Describe this prototype"
+            ></textarea>
+
+        </label>
+
+
+        <label>
+
+            Status
+
+            <select id="prototypeDetailsStatus">
+
+                <option value="planning">
+                    Planning
+                </option>
+
+                <option value="designing">
+                    Designing
+                </option>
+
+                <option value="building">
+                    Building
+                </option>
+
+                <option value="testing">
+                    Testing
+                </option>
+
+                <option value="completed">
+                    Completed
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            Version
+
+            <input
+                type="text"
+                id="prototypeDetailsVersion"
+                placeholder="V1"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Tags
+
+            <input
+                type="text"
+                id="prototypeDetailsTags"
+                placeholder="Separate tags with commas"
+            >
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeDetails"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeDetails"
+            type="button"
+        >
+            Save Changes
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     PROGRESS MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeProgressModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                DEVELOPMENT PROGRESS
+            </span>
+
+            <h2>
+                Update Progress
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeProgressModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Completion Percentage
+
+            <input
+                type="number"
+                id="prototypeProgressInput"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="0 - 100"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Current Phase
+
+            <select id="prototypeProgressPhase">
+
+                <option value="Planning phase">
+                    Planning phase
+                </option>
+
+                <option value="Design phase">
+                    Design phase
+                </option>
+
+                <option value="Build phase">
+                    Build phase
+                </option>
+
+                <option value="Testing phase">
+                    Testing phase
+                </option>
+
+                <option value="Completed">
+                    Completed
+                </option>
+
+            </select>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeProgress"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeProgress"
+            type="button"
+        >
+            Update Progress
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     VERSION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeVersionModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                CURRENT VERSION
+            </span>
+
+            <h2>
+                Edit Version
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeVersionModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label>
+
+            Version
+
+            <input
+                type="text"
+                id="prototypeVersionInput"
+                placeholder="V2"
+            >
+
+        </label>
+
+
+        <label>
+
+            Version Title
+
+            <input
+                type="text"
+                id="prototypeVersionTitleInput"
+                placeholder="Version title"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Version Description
+
+            <textarea
+                id="prototypeVersionDescriptionInput"
+                placeholder="What changed in this version?"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeVersion"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeVersion"
+            type="button"
+        >
+            Save Version
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     NEXT ACTION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeNextActionModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                NEXT ACTION
+            </span>
+
+            <h2>
+                Update Next Action
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeNextActionModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Action
+
+            <input
+                type="text"
+                id="prototypeNextActionInput"
+                placeholder="What needs to be done next?"
+            >
+
+        </label>
+
+
+        <label>
+
+            Due Date
+
+            <input
+                type="date"
+                id="prototypeNextActionDate"
+            >
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeNextAction"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeNextAction"
+            type="button"
+        >
+            Save Action
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     OBJECTIVE MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeObjectiveModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                PURPOSE
+            </span>
+
+            <h2>
+                Edit Prototype Objective
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeObjectiveModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Objective
+
+            <textarea
+                id="prototypeObjectiveInput"
+                placeholder="What should this prototype demonstrate, test or validate?"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeObjective"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeObjective"
+            type="button"
+        >
+            Save Objective
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     DESIGN MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeDesignModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                DESIGN
+            </span>
+
+            <h2>
+                Edit Design Concept
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeDesignModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Design Concept
+
+            <textarea
+                id="prototypeDesignConceptInput"
+                placeholder="Explain the engineering concept and selected architecture"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeDesign"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeDesign"
+            type="button"
+        >
+            Save Design
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     SPECIFICATION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeSpecificationModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                SPECIFICATIONS
+            </span>
+
+            <h2>
+                Add Specification
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeSpecificationModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label>
+
+            Parameter
+
+            <input
+                type="text"
+                id="prototypeSpecificationName"
+                placeholder="Rated Power"
+            >
+
+        </label>
+
+
+        <label>
+
+            Value
+
+            <input
+                type="text"
+                id="prototypeSpecificationValue"
+                placeholder="1.2 kW"
+            >
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeSpecification"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeSpecification"
+            type="button"
+        >
+            Add Specification
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     DESIGN DECISION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeDesignDecisionModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                ENGINEERING NOTES
+            </span>
+
+            <h2>
+                Add Design Decision
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeDesignDecisionModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Decision
+
+            <input
+                type="text"
+                id="prototypeDesignDecisionTitle"
+                placeholder="What decision was made?"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Reasoning
+
+            <textarea
+                id="prototypeDesignDecisionDescription"
+                placeholder="Why was this decision made?"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeDesignDecision"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeDesignDecision"
+            type="button"
+        >
+            Add Decision
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     BUILD ENTRY MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="buildModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                BUILD LOG
+            </span>
+
+            <h2>
+                Add Build Entry
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closeBuildModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Build Activity
+
+            <input
+                type="text"
+                id="buildEntryTitle"
+                placeholder="What was built or completed?"
+            >
+
+        </label>
+
+
+        <label>
+
+            Date
+
+            <input
+                type="date"
+                id="buildEntryDate"
+            >
+
+        </label>
+
+
+        <label>
+
+            Progress
+
+            <input
+                type="number"
+                id="buildEntryProgress"
+                min="0"
+                max="100"
+                placeholder="0 - 100"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Details
+
+            <textarea
+                id="buildEntryDescription"
+                placeholder="Describe the build activity and result"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelBuildEntry"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="saveBuildEntry"
+            type="button"
+        >
+            Add Entry
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     COMPONENT MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeComponentModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                HARDWARE
+            </span>
+
+            <h2>
+                Add Component
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeComponentModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Component Name
+
+            <input
+                type="text"
+                id="prototypeComponentName"
+                placeholder="Component name"
+            >
+
+        </label>
+
+
+        <label>
+
+            Quantity
+
+            <input
+                type="number"
+                id="prototypeComponentQuantity"
+                min="1"
+                step="1"
+                placeholder="1"
+            >
+
+        </label>
+
+
+        <label>
+
+            Status
+
+            <select id="prototypeComponentStatus">
+
+                <option value="active">
+                    Active
+                </option>
+
+                <option value="planned">
+                    Planned
+                </option>
+
+                <option value="removed">
+                    Removed
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeComponentDescription"
+                placeholder="Component purpose or specification"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeComponent"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeComponent"
+            type="button"
+        >
+            Add Component
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     TEST MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeTestModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                VALIDATION
+            </span>
+
+            <h2>
+                Add Test
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeTestModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Test Name
+
+            <input
+                type="text"
+                id="prototypeTestName"
+                placeholder="Test name"
+            >
+
+        </label>
+
+
+        <label>
+
+            Result
+
+            <select id="prototypeTestResult">
+
+                <option value="passed">
+                    Passed
+                </option>
+
+                <option value="failed">
+                    Failed
+                </option>
+
+                <option value="pending">
+                    Pending
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            Date
+
+            <input
+                type="date"
+                id="prototypeTestDate"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeTestDescription"
+                placeholder="What was tested and what happened?"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeTest"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeTest"
+            type="button"
+        >
+            Add Test
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     MEASUREMENT MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeMeasurementModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                MEASUREMENTS
+            </span>
+
+            <h2>
+                Add Measurement
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeMeasurementModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Parameter
+
+            <input
+                type="text"
+                id="prototypeMeasurementParameter"
+                placeholder="Output Voltage"
+            >
+
+        </label>
+
+
+        <label>
+
+            Expected Value
+
+            <input
+                type="text"
+                id="prototypeMeasurementExpected"
+                placeholder="48"
+            >
+
+        </label>
+
+
+        <label>
+
+            Measured Value
+
+            <input
+                type="text"
+                id="prototypeMeasurementMeasured"
+                placeholder="47.8"
+            >
+
+        </label>
+
+
+        <label>
+
+            Unit
+
+            <input
+                type="text"
+                id="prototypeMeasurementUnit"
+                placeholder="V"
+            >
+
+        </label>
+
+
+        <label>
+
+            Result
+
+            <select id="prototypeMeasurementResult">
+
+                <option value="PASS">
+                    Pass
+                </option>
+
+                <option value="CHECK">
+                    Check
+                </option>
+
+                <option value="FAIL">
+                    Fail
+                </option>
+
+            </select>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeMeasurement"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeMeasurement"
+            type="button"
+        >
+            Add Measurement
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     ITERATION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeIterationModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                DEVELOPMENT HISTORY
+            </span>
+
+            <h2>
+                Add Prototype Iteration
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeIterationModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label>
+
+            Version
+
+            <input
+                type="text"
+                id="prototypeIterationVersion"
+                placeholder="V3"
+            >
+
+        </label>
+
+
+        <label>
+
+            Date
+
+            <input
+                type="date"
+                id="prototypeIterationDate"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Iteration Title
+
+            <input
+                type="text"
+                id="prototypeIterationTitle"
+                placeholder="Iteration title"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeIterationDescription"
+                placeholder="Describe what changed"
+            ></textarea>
+
+        </label>
+
+
+        <label class="full">
+
+            Changes
+
+            <textarea
+                id="prototypeIterationChanges"
+                placeholder="Enter one change per line"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeIteration"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeIteration"
+            type="button"
+        >
+            Add Iteration
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     FAILURE MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeFailureModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                LEARNING FROM FAILURE
+            </span>
+
+            <h2>
+                Add Failure
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeFailureModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Failure / Problem
+
+            <input
+                type="text"
+                id="prototypeFailureTitle"
+                placeholder="What went wrong?"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeFailureDescription"
+                placeholder="Describe the problem and what was observed"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeFailure"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeFailure"
+            type="button"
+        >
+            Add Failure
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     MODIFICATION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeModificationModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                MODIFICATIONS
+            </span>
+
+            <h2>
+                Add Modification
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeModificationModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Modification
+
+            <input
+                type="text"
+                id="prototypeModificationTitle"
+                placeholder="What was changed?"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeModificationDescription"
+                placeholder="Describe the modification and reason"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeModification"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeModification"
+            type="button"
+        >
+            Add Modification
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     IMPROVEMENT MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeImprovementModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                NEXT ITERATION
+            </span>
+
+            <h2>
+                Add Improvement
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeImprovementModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label>
+
+            Priority
+
+            <select id="prototypeImprovementPriority">
+
+                <option value="HIGH PRIORITY">
+                    High Priority
+                </option>
+
+                <option value="MEDIUM PRIORITY">
+                    Medium Priority
+                </option>
+
+                <option value="LOW PRIORITY">
+                    Low Priority
+                </option>
+
+                <option value="FUTURE">
+                    Future
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label class="full">
+
+            Improvement
+
+            <input
+                type="text"
+                id="prototypeImprovementTitle"
+                placeholder="What should be improved?"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeImprovementDescription"
+                placeholder="Describe the expected improvement"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeImprovement"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeImprovement"
+            type="button"
+        >
+            Add Improvement
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+<!-- =====================================================
+     LINK MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    id="prototypeLinkModal"
+>
+
+  
+<div class="modal-panel">
+
+    <div class="modal-header">
+
+        <div>
+
+            <span class="section-label">
+                RESOURCE
+            </span>
+
+            <h2>
+                Add Link
+            </h2>
+
+        </div>
+
+
+        <button
+            id="closePrototypeLinkModal"
+            type="button"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-grid">
+
+        <label class="full">
+
+            Title
+
+            <input
+                type="text"
+                id="prototypeLinkTitle"
+                placeholder="Resource title"
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            URL
+
+            <input
+                type="url"
+                id="prototypeLinkURL"
+                placeholder="https://..."
+            >
+
+        </label>
+
+
+        <label class="full">
+
+            Description
+
+            <textarea
+                id="prototypeLinkDescription"
+                placeholder="Why is this useful?"
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            class="outline-button"
+            id="cancelPrototypeLink"
+            type="button"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="primary-button"
+            id="savePrototypeLink"
+            type="button"
+        >
+            Add Link
+        </button>
+
+    </div>
+
+</div>
+  
+
+</div>
+
+
+<!-- =====================================================
+     DELETE CONFIRMATION MODAL
+===================================================== -->
+
+<div
+    class="prototype-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="prototypeConfirmTitle"
+    id="prototypeConfirmModal"
+>
+    <div class="modal-panel prototype-confirm-panel">
+        <div class="modal-header">
+            <div>
+                <span class="section-label">CONFIRMATION</span>
+                <h2 id="prototypeConfirmTitle">Delete item?</h2>
+            </div>
+
+            <button
+                id="closePrototypeConfirmModal"
+                type="button"
+                aria-label="Close"
+            >×</button>
+        </div>
+
+        <p id="prototypeConfirmMessage" class="prototype-confirm-message">
+            Are you sure you want to delete this item?
+        </p>
+
+        <div class="modal-actions">
+            <button
+                class="outline-button"
+                id="cancelPrototypeConfirm"
+                type="button"
+            >Cancel</button>
+
+            <button
+                class="danger-button"
+                id="prototypeConfirmButton"
+                type="button"
+            >Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    class="prototype-toast hidden"
+    id="prototypeToast"
+    role="status"
+    aria-live="polite"
+></div>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- RiGiD Supabase Client -->
+<script src="../../../supabase-client.js"></script>
+
+<!-- RiGiD Google Drive Reconnect (automatic — no visible connect button) -->
+<script src="../../../google-drive-reconnect.js"></script>
+
+<script
+    src="prototype.js"
+></script>
+
+</body>
+
+</html>
