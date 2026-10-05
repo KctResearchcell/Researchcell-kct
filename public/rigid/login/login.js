@@ -2203,6 +2203,122 @@ function routeApprovedUser(
 
 
 /* =========================================================================
+   FORGOT PASSWORD
+   ========================================================================= */
+
+async function sendPasswordReset() {
+
+  clearMessage();
+
+
+  const emailInput =
+    el("loginEmail");
+
+  const button =
+    el("forgotPasswordBtn");
+
+
+  const email =
+    emailInput
+      ? emailInput.value.trim()
+      : "";
+
+
+  if (!email) {
+
+    showMessage(
+      "Enter your email address first."
+    );
+
+    emailInput?.focus();
+
+    return;
+
+  }
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Sending…";
+
+  }
+
+
+  try {
+
+    /*
+     * Resolved relative to this page so it works under any
+     * base path, e.g.
+     * https://researchcell.kct.ac.in/rigid/login/update-password.html
+     */
+    const { error } =
+      await sb.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo:
+            new URL(
+              "update-password.html",
+              window.location.href
+            ).href
+        }
+      );
+
+
+    if (error) {
+
+      showMessage(
+        error.message ||
+        "Unable to send the password reset link."
+      );
+
+      return;
+
+    }
+
+
+    // Generic message: never reveal whether the account exists.
+    showMessage(
+      "If an account exists for this email, a password reset link has been sent. Please check your inbox and spam folder.",
+      "ok"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Password reset request failed."
+    );
+
+    showMessage(
+      error?.message ||
+      "Unable to send the password reset link."
+    );
+
+  }
+
+  finally {
+
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Forgot password?";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================================
    LOGIN
    ========================================================================= */
 
@@ -4565,6 +4681,13 @@ document.addEventListener(
       ?.addEventListener(
         "submit",
         loginUser
+      );
+
+
+    el("forgotPasswordBtn")
+      ?.addEventListener(
+        "click",
+        sendPasswordReset
       );
 
 
