@@ -787,6 +787,319 @@ async function initializeViewedProfile() {
 
 }
 
+/* =========================================================
+   PERSONAL DATA — GOOGLE DRIVE
+   (existing personal-data Edge Function)
+
+   Blogs, links, accolades and reminders are stored in the
+   CURRENTLY AUTHENTICATED user's own Google Drive.
+   No profile ID or user ID is ever sent to the function:
+   it always resolves the user from the access token.
+
+   personal_work stays in Supabase.
+========================================================= */
+
+const PERSONAL_DATA_FUNCTION_URL =
+    "https://mmmsmncmskvuqyhaqcne.supabase.co/functions/v1/personal-data";
+
+
+/*
+ * true only after the logged-in user's own Drive data loaded
+ * successfully. Saves are refused otherwise, so a failed load
+ * can never overwrite existing Drive data with empty data.
+ */
+let personalDriveDataLoaded = false;
+
+let personalDriveSaveChain = Promise.resolve();
+
+
+function getEmptyPersonalDriveData() {
+
+    return {
+        blogs: {},
+        links: [],
+        accolades: [],
+        reminders: []
+    };
+
+}
+
+
+async function getPersonalDriveAccessToken() {
+
+    const {
+        data: { session },
+        error
+    } = await sb.auth.getSession();
+
+
+    if (error) {
+        throw new Error(
+            `Unable to read the current session: ${error.message}`
+        );
+    }
+
+
+    if (!session || !session.access_token) {
+        throw new Error(
+            "Your session has expired. Please log in again."
+        );
+    }
+
+
+    return session.access_token;
+
+}
+
+
+async function parsePersonalDriveResponse(response, action) {
+
+    let result = null;
+
+    try {
+        result = await response.json();
+    }
+    catch {
+        result = null;
+    }
+
+
+    if (!response.ok) {
+
+        const httpError =
+            new Error(
+                result?.error ||
+                result?.message ||
+                `Personal data ${action} failed (HTTP ${response.status}).`
+            );
+
+        httpError.status =
+            response.status;
+
+        throw httpError;
+
+    }
+
+
+    if (!result || result.success !== true) {
+
+        const resultError =
+            new Error(
+                result?.error ||
+                result?.message ||
+                `Personal data ${action} failed: unexpected response from the personal-data function.`
+            );
+
+        resultError.status =
+            response.status;
+
+        throw resultError;
+
+    }
+
+
+    return result.data;
+
+}
+
+
+/*
+ * Reads Personal Data.
+ *
+ * - Own workspace:        { action: "read" }  (no profile_id)
+ * - Admin viewing member: { action: "read", profile_id }
+ *
+ * profile_id is only ever sent for a READ while viewing
+ * another member. The Edge Function decides (server-side)
+ * whether the caller may read it; a non-admin gets HTTP 403.
+ */
+async function loadPersonalDriveData(profileId) {
+
+    const accessToken =
+        await getPersonalDriveAccessToken();
+
+
+    const body = {
+        action: "read"
+    };
+
+
+    if (
+        viewingOtherProfile &&
+        profileId &&
+        profileId !== loggedInUserId
+    ) {
+        body.profile_id =
+            profileId;
+    }
+
+
+    const response =
+        await fetch(
+            PERSONAL_DATA_FUNCTION_URL,
+            {
+                method: "POST",
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`,
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify(body)
+            }
+        );
+
+
+    const data =
+        await parsePersonalDriveResponse(
+            response,
+            "load"
+        );
+
+
+    const source =
+        data && typeof data === "object"
+            ? data
+            : {};
+
+
+    return {
+        blogs:
+            source.blogs &&
+            typeof source.blogs === "object" &&
+            !Array.isArray(source.blogs)
+                ? source.blogs
+                : {},
+        links:
+            Array.isArray(source.links)
+                ? source.links
+                : [],
+        accolades:
+            Array.isArray(source.accolades)
+                ? source.accolades
+                : [],
+        reminders:
+            Array.isArray(source.reminders)
+                ? source.reminders
+                : []
+    };
+
+}
+
+
+async function savePersonalDriveData(data) {
+
+    const accessToken =
+        await getPersonalDriveAccessToken();
+
+
+    const response =
+        await fetch(
+            PERSONAL_DATA_FUNCTION_URL,
+            {
+                method: "POST",
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`,
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    action: "save",
+                    data
+                })
+            }
+        );
+
+
+    return await parsePersonalDriveResponse(
+        response,
+        "save"
+    );
+
+}
+
+
+/*
+ * Saves the complete personal data object for the logged-in
+ * user's own page. Saves run one at a time so overlapping
+ * edits cannot overwrite each other out of order.
+ */
+function persistPersonalDriveData() {
+
+    if (viewingOtherProfile) {
+        return Promise.reject(
+            new Error(
+                "This member's personal workspace is read-only."
+            )
+        );
+    }
+
+
+    if (!personalDriveDataLoaded) {
+        return Promise.reject(
+            new Error(
+                "Personal data could not be loaded from Google Drive. Reload the page before saving."
+            )
+        );
+    }
+
+
+    const run = () =>
+        savePersonalDriveData({
+            blogs: dailyBlogs,
+            links: personalLinks,
+            accolades: accolades,
+            reminders: reminders
+        });
+
+
+    const pending =
+        personalDriveSaveChain.then(run, run);
+
+
+    personalDriveSaveChain =
+        pending.catch(() => { });
+
+
+    return pending;
+
+}
+
+
+/*
+ * The existing calendar/date-activity UI shows links as
+ * extraActivities items of type "link". Links are stored in
+ * personalLinks; this converts one for display.
+ */
+function personalLinkToActivity(link) {
+
+    return {
+
+        id:
+            link.id,
+
+        date:
+            link.date ||
+            String(link.createdAt || "").slice(0, 10),
+
+        type:
+            "link",
+
+        title:
+            link.title,
+
+        description:
+            link.description || "",
+
+        url:
+            link.url
+
+    };
+
+}
+
+
 async function loadPersonalWorkspaceData() {
 
     try {
@@ -821,15 +1134,11 @@ async function loadPersonalWorkspaceData() {
 
 
         /* =================================================
-           LOAD ALL PERSONAL TABLES
+           LOAD PERSONAL WORK (Supabase)
         ================================================= */
 
         const [
-            workResult,
-            blogResult,
-            reminderResult,
-            accoladeResult,
-            linkResult
+            workResult
         ] = await Promise.all([
 
             sb
@@ -852,73 +1161,6 @@ async function loadPersonalWorkspaceData() {
                 .eq("profile_id", profileId)
                 .order("created_at", {
                     ascending: false
-                }),
-
-
-            sb
-                .from("daily_blogs")
-                .select(`
-                    id,
-                    profile_id,
-                    date,
-                    content,
-                    created_at,
-                    updated_at
-                `)
-                .eq("profile_id", profileId)
-                .order("date", {
-                    ascending: false
-                }),
-
-
-            sb
-                .from("personal_reminders")
-                .select(`
-                    id,
-                    profile_id,
-                    title,
-                    date,
-                    hour,
-                    minute,
-                    description,
-                    created_at
-                `)
-                .eq("profile_id", profileId)
-                .order("date", {
-                    ascending: false
-                }),
-
-
-            sb
-                .from("personal_accolades")
-                .select(`
-                    id,
-                    profile_id,
-                    title,
-                    date,
-                    description,
-                    url,
-                    created_at
-                `)
-                .eq("profile_id", profileId)
-                .order("date", {
-                    ascending: false
-                }),
-
-
-            sb
-                .from("personal_links")
-                .select(`
-                    id,
-                    profile_id,
-                    title,
-                    url,
-                    description,
-                    created_at
-                `)
-                .eq("profile_id", profileId)
-                .order("created_at", {
-                    ascending: false
                 })
 
         ]);
@@ -930,22 +1172,6 @@ async function loadPersonalWorkspaceData() {
 
         if (workResult.error) {
             throw workResult.error;
-        }
-
-        if (blogResult.error) {
-            throw blogResult.error;
-        }
-
-        if (reminderResult.error) {
-            throw reminderResult.error;
-        }
-
-        if (accoladeResult.error) {
-            throw accoladeResult.error;
-        }
-
-        if (linkResult.error) {
-            throw linkResult.error;
         }
 
 
@@ -999,19 +1225,75 @@ async function loadPersonalWorkspaceData() {
 
 
         /* =================================================
-           DAILY BLOGS
-           Convert rows → existing date-keyed structure
+           PERSONAL DATA (Google Drive)
+
+           Only the logged-in user's own page reads Drive.
+           When an admin views another member, nothing is
+           read from or written to Drive (read-only view).
         ================================================= */
 
-        dailyBlogs = {};
+        let driveData =
+            getEmptyPersonalDriveData();
+
+        /*
+         * Saving is only ever enabled after the logged-in
+         * user's OWN data loaded successfully. A member view
+         * (admin) is always read-only, and a failed load never
+         * allows an empty object to overwrite Drive data.
+         */
+        personalDriveDataLoaded = false;
 
 
-        (blogResult.data || []).forEach(blog => {
+        try {
 
-            dailyBlogs[blog.date] =
-                blog.content;
+            driveData =
+                await loadPersonalDriveData(
+                    viewingOtherProfile
+                        ? viewedProfileId
+                        : user.id
+                );
 
-        });
+            if (!viewingOtherProfile) {
+                personalDriveDataLoaded = true;
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Failed to load personal Drive data:",
+                error
+            );
+
+            let message;
+
+            if (viewingOtherProfile && error.status === 403) {
+                message =
+                    "You do not have permission to view this member's personal data.";
+            }
+            else if (viewingOtherProfile) {
+                message =
+                    `Unable to load this member's personal data: ${error.message}`;
+            }
+            else {
+                message =
+                    `Unable to load your personal data from Google Drive: ${error.message}. Saving is disabled until the page is reloaded.`;
+            }
+
+            showToast(message);
+
+            driveData =
+                getEmptyPersonalDriveData();
+
+        }
+
+
+        /* =================================================
+           DAILY BLOGS
+        ================================================= */
+
+        dailyBlogs =
+            driveData.blogs || {};
 
 
         /* =================================================
@@ -1019,29 +1301,14 @@ async function loadPersonalWorkspaceData() {
         ================================================= */
 
         reminders =
-            (reminderResult.data || []).map(reminder => ({
-
-                id:
-                    reminder.id,
-
-                title:
-                    reminder.title,
-
-                date:
-                    reminder.date,
-
-                hour:
-                    Number(reminder.hour),
-
-                minute:
-                    Number(reminder.minute),
-
-                description:
-                    reminder.description || "",
-
-                createdAt:
-                    reminder.created_at
-
+            (driveData.reminders || []).map(reminder => ({
+                id: reminder.id,
+                title: reminder.title,
+                date: reminder.date,
+                hour: Number(reminder.hour),
+                minute: Number(reminder.minute),
+                description: reminder.description || "",
+                createdAt: reminder.createdAt || reminder.date
             }));
 
 
@@ -1050,26 +1317,13 @@ async function loadPersonalWorkspaceData() {
         ================================================= */
 
         accolades =
-            (accoladeResult.data || []).map(accolade => ({
-
-                id:
-                    accolade.id,
-
-                title:
-                    accolade.title,
-
-                date:
-                    accolade.date,
-
-                description:
-                    accolade.description || "",
-
-                url:
-                    accolade.url || "",
-
-                createdAt:
-                    accolade.created_at
-
+            (driveData.accolades || []).map(accolade => ({
+                id: accolade.id,
+                title: accolade.title,
+                date: accolade.date,
+                description: accolade.description || "",
+                url: accolade.url || "",
+                createdAt: accolade.createdAt || accolade.date
             }));
 
 
@@ -1078,36 +1332,27 @@ async function loadPersonalWorkspaceData() {
         ================================================= */
 
         personalLinks =
-            (linkResult.data || []).map(link => ({
-
-                id:
-                    link.id,
-
-                title:
-                    link.title,
-
-                url:
-                    link.url,
-
-                description:
-                    link.description || "",
-
-                createdAt:
-                    link.created_at
-
+            (driveData.links || []).map(link => ({
+                id: link.id,
+                title: link.title,
+                url: link.url,
+                description: link.description || "",
+                createdAt: link.createdAt || link.date || "",
+                date: link.date || ""
             }));
 
 
         /* =================================================
            EXTRA ACTIVITIES
-           
-           IMPORTANT:
-           We are NOT generating fake activities.
-           Real uploads/Drive activity will be connected
-           separately.
+
+           Rebuilt from scratch on every load, so links are
+           never duplicated. No fake activities are created.
         ================================================= */
 
-        extraActivities = [];
+        extraActivities =
+            personalLinks.map(
+                personalLinkToActivity
+            );
 
 
   
@@ -6482,7 +6727,7 @@ function loadSelectedDateActivities() {
 }
 
 
-function saveDailyBlog() {
+async function saveDailyBlog() {
 
     if (viewingOtherProfile) {
 
@@ -6511,6 +6756,16 @@ function saveDailyBlog() {
         textarea.value.trim();
 
 
+    const hadPrevious =
+        Object.prototype.hasOwnProperty.call(
+            dailyBlogs,
+            date
+        );
+
+    const previousValue =
+        dailyBlogs[date];
+
+
     if (value) {
 
         dailyBlogs[date] =
@@ -6528,9 +6783,37 @@ function saveDailyBlog() {
     loadSelectedDateActivities();
 
 
-    showToast(
-        "Daily blog saved."
-    );
+    try {
+
+        await persistPersonalDriveData();
+
+        showToast(
+            "Daily blog saved."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to save personal Drive data:",
+            error
+        );
+
+        if (hadPrevious) {
+            dailyBlogs[date] = previousValue;
+        } else {
+            delete dailyBlogs[date];
+        }
+
+        renderCalendar();
+
+        loadSelectedDateActivities();
+
+        showToast(
+            `Daily blog was not saved: ${error.message}`
+        );
+
+    }
 
 }
 
@@ -6875,7 +7158,7 @@ function openReminderModal() {
 }
 
 
-function saveReminder(event) {
+async function saveReminder(event) {
 
     if (viewingOtherProfile) {
 
@@ -6924,7 +7207,7 @@ function saveReminder(event) {
     }
 
 
-    reminders.push({
+    const reminder = {
 
         id:
             Date.now(),
@@ -6947,7 +7230,39 @@ function saveReminder(event) {
         createdAt:
             date
 
-    });
+    };
+
+
+    reminders.push(reminder);
+
+
+    try {
+
+        await persistPersonalDriveData();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to save personal Drive data:",
+            error
+        );
+
+        reminders =
+            reminders.filter(
+                item =>
+                    item !== reminder
+            );
+
+        refreshWorkspace();
+
+        showToast(
+            `Reminder was not saved: ${error.message}`
+        );
+
+        return;
+
+    }
 
 
     refreshWorkspace();
@@ -7066,7 +7381,7 @@ function openLinkModal() {
 }
 
 
-function saveLink(event) {
+async function saveLink(event) {
 
     if (viewingOtherProfile) {
 
@@ -7116,27 +7431,75 @@ function saveLink(event) {
     }
 
 
-    extraActivities.push({
+    const link = {
 
         id:
             `link-${Date.now()}`,
 
-        date:
-            getDateKey(selectedDate),
+        title,
 
-        type:
-            "link",
-
-        title:
-            title,
+        url,
 
         description:
             getInputValue("linkDescription"),
 
-        url:
-            url
+        createdAt:
+            new Date().toISOString(),
 
-    });
+        /*
+         * Calendar day the link is shown on
+         * (same as the previous behaviour).
+         */
+        date:
+            getDateKey(selectedDate)
+
+    };
+
+
+    const linkActivity =
+        personalLinkToActivity(link);
+
+
+    personalLinks.push(link);
+
+    extraActivities.push(linkActivity);
+
+
+    try {
+
+        await persistPersonalDriveData();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to save personal Drive data:",
+            error
+        );
+
+        personalLinks =
+            personalLinks.filter(
+                item =>
+                    item !== link
+            );
+
+        extraActivities =
+            extraActivities.filter(
+                item =>
+                    item !== linkActivity
+            );
+
+        renderCalendar();
+
+        loadSelectedDateActivities();
+
+        showToast(
+            `Link was not saved: ${error.message}`
+        );
+
+        return;
+
+    }
 
 
     closeLinkModal();
@@ -8268,7 +8631,7 @@ function renderAccolades() {
 }
 
 
-function addAccolade(event) {
+async function addAccolade(event) {
 
     if (viewingOtherProfile) {
 
@@ -8316,24 +8679,55 @@ function addAccolade(event) {
     }
 
 
-    accolades.push({
+    const accolade = {
 
         id:
-            Date.now(),
+            `accolade-${Date.now()}`,
 
-        title:
-            title,
+        title,
 
-        date:
-            date,
+        date,
 
-        description:
-            description,
+        description,
 
-        url:
-            url
+        url,
 
-    });
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    accolades.push(accolade);
+
+
+    try {
+
+        await persistPersonalDriveData();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to save personal Drive data:",
+            error
+        );
+
+        accolades =
+            accolades.filter(
+                item =>
+                    item !== accolade
+            );
+
+        renderAccolades();
+
+        showToast(
+            `Accolade was not saved: ${error.message}`
+        );
+
+        return;
+
+    }
 
 
     renderAccolades();
@@ -8357,7 +8751,7 @@ function addAccolade(event) {
 }
 
 
-function deleteAccolade(id) {
+async function deleteAccolade(id) {
 
     if (viewingOtherProfile) {
 
@@ -8392,6 +8786,10 @@ function deleteAccolade(id) {
     }
 
 
+    const previousAccolades =
+        accolades;
+
+
     accolades =
         accolades.filter(
             item =>
@@ -8400,6 +8798,32 @@ function deleteAccolade(id) {
 
 
     renderAccolades();
+
+
+    try {
+
+        await persistPersonalDriveData();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to save personal Drive data:",
+            error
+        );
+
+        accolades =
+            previousAccolades;
+
+        renderAccolades();
+
+        showToast(
+            `Accolade was not removed: ${error.message}`
+        );
+
+        return;
+
+    }
 
 
     showToast(
