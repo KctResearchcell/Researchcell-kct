@@ -4675,6 +4675,34 @@ document.addEventListener(
     await checkExistingSession();
 
 
+    /*
+     * The session check above can reset the message box (tab switch,
+     * Google profile setup). Re-show the Drive callback result so it
+     * is not silently lost.
+     */
+    if (
+      googleDriveCallbackStatus === "error" ||
+      googleDriveCallbackStatus === "denied"
+    ) {
+
+      showMessage(
+        "Google Drive authorization was not completed. You can try again."
+      );
+
+    }
+    else if (
+      googleDriveCallbackStatus === "connected" &&
+      googleDriveIsConnected
+    ) {
+
+      showMessage(
+        "Google Drive connected successfully.",
+        "ok"
+      );
+
+    }
+
+
     /* -----------------------------------------------------
        LOGIN
        ----------------------------------------------------- */
