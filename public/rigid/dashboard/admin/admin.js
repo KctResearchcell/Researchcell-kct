@@ -46,6 +46,83 @@ let supportReports = [];
 
 let selectedForum = "all";
 
+/*
+ * Administrator scope.
+ *
+ * PRIMARY ADMIN   : profiles.role = "admin"  -> every forum.
+ * SECONDARY ADMIN : forum_members.role = "secondary_admin"
+ *                   -> only those forums.
+ *
+ * This only shapes what the dashboard shows. Supabase enforces the
+ * real boundary (RLS policies + forum-scoped admin_* functions).
+ */
+let adminScope = {
+    isPrimary: false,
+    forumIds: []
+};
+
+
+function isForumInScope(forumId) {
+
+    if (adminScope.isPrimary) {
+        return true;
+    }
+
+    return adminScope.forumIds
+        .map(String)
+        .includes(String(forumId));
+
+}
+
+
+/*
+ * Secondary admins call the SAME admin_* functions as the primary admin.
+ * Each function checks public.is_forum_admin() for the forum it touches,
+ * so Supabase rejects anything outside the secondary admin's forums.
+ * Forum create/update/delete stay primary-admin-only.
+ */
+const SECONDARY_ADMIN_ALLOWED_RPC = new Set([
+    "admin_create_team",
+    "admin_update_team",
+    "admin_delete_team",
+    "admin_create_domain",
+    "admin_update_domain",
+    "admin_delete_domain",
+    "admin_add_forum_member",
+    "admin_remove_forum_member",
+    "admin_add_team_member",
+    "admin_remove_team_member",
+    "admin_add_domain_member",
+    "admin_remove_domain_member",
+    "admin_create_task",
+    "admin_update_task",
+    "admin_delete_task",
+    "admin_add_task_member",
+    "admin_remove_task_member"
+]);
+
+
+async function adminRpc(name, params) {
+
+    if (
+        !adminScope.isPrimary &&
+        !SECONDARY_ADMIN_ALLOWED_RPC.has(name)
+    ) {
+
+        return {
+            data: null,
+            error: {
+                message:
+                    "Only the primary administrator can do this."
+            }
+        };
+
+    }
+
+    return sb.rpc(name, params);
+
+}
+
 let activePanel = null;
 
 const TASK_CATEGORIES = [
@@ -323,9 +400,50 @@ async function loadAdminProfile() {
            ADMIN SECURITY
         ----------------------------------------------------- */
 
+        adminScope = {
+            isPrimary:
+                currentProfile.role === "admin",
+            forumIds: []
+        };
+
+
+        if (!adminScope.isPrimary) {
+
+            const {
+                data: adminForums,
+                error: adminForumsError
+            } =
+                await sb
+                    .from("forum_members")
+                    .select("forum_id")
+                    .eq(
+                        "profile_id",
+                        currentUser.id
+                    )
+                    .eq(
+                        "role",
+                        "secondary_admin"
+                    );
+
+            if (adminForumsError) {
+
+                console.error(
+                    "Secondary admin lookup:",
+                    adminForumsError
+                );
+
+            }
+
+            adminScope.forumIds =
+                (adminForums || [])
+                    .map(row => row.forum_id);
+
+        }
+
+
         if (
-            currentProfile.role !==
-            "admin"
+            !adminScope.isPrimary &&
+            !adminScope.forumIds.length
         ) {
 
             alert(
@@ -923,6 +1041,67 @@ async function updateSupportReportStatus(reportId, newStatus) {
    LOAD ALL DATA
 ========================================================= */
 
+function applyAdminScope() {
+
+    if (adminScope.isPrimary) {
+        return;
+    }
+
+    forums =
+        forums.filter(
+            forum =>
+                isForumInScope(forum.id)
+        );
+
+    teams =
+        teams.filter(
+            team =>
+                isForumInScope(team.forum_id)
+        );
+
+    domains =
+        domains.filter(
+            domain =>
+                isForumInScope(domain.forum_id)
+        );
+
+    tasks =
+        tasks.filter(
+            task =>
+                isForumInScope(task.forum_id)
+        );
+
+    workItems =
+        workItems.filter(
+            work =>
+                isForumInScope(work.forum_id)
+        );
+
+    // Support reports are addressed to the primary administrator.
+    supportReports = [];
+
+}
+
+
+function applyAdminScopeToPage() {
+
+    if (adminScope.isPrimary) {
+        return;
+    }
+
+    // Forums can only be created by the primary administrator.
+    el("createForumBtn")
+        ?.classList
+        .add("hidden");
+
+        document
+        .querySelector(".support-reports-section")
+        ?.classList
+        .add("hidden");
+
+}
+
+
 async function loadAllData() {
 
     await Promise.all([
@@ -932,8 +1111,12 @@ async function loadAllData() {
         loadProfiles(),
         loadTasks(),
         loadWorkItems(),
-        loadSupportReports()
+        adminScope.isPrimary
+            ? loadSupportReports()
+            : Promise.resolve()
     ]);
+
+    applyAdminScope();
 
     renderSupportReports();
 }
@@ -2761,6 +2944,27 @@ ${editing
     `;
 
 
+    // Forum name/description can only be changed by the primary admin.
+    // Secondary admins still use this editor to manage teams and domains.
+    if (
+        editing &&
+        !adminScope.isPrimary
+    ) {
+
+        el("rigidForumName")
+            ?.setAttribute("readonly", "");
+
+        el("rigidForumDescription")
+            ?.setAttribute("readonly", "");
+
+        content
+            .querySelector('#rigidForumForm button[type="submit"]')
+            ?.classList
+            .add("hidden");
+
+    }
+
+
     content
         .querySelector("form")
         .addEventListener(
@@ -2768,6 +2972,19 @@ ${editing
             async event => {
 
                 event.preventDefault();
+
+                if (
+                    editing &&
+                    !adminScope.isPrimary
+                ) {
+
+                    closeModal(
+                        "rigidForumFormModal"
+                    );
+
+                    return;
+
+                }
 
                 const name =
                     el("rigidForumName")
@@ -2787,7 +3004,7 @@ ${editing
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_update_forum",
                                 {
                                     p_forum_id:
@@ -2812,7 +3029,7 @@ ${editing
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_create_forum",
                                 {
                                     p_name:
@@ -2940,7 +3157,15 @@ DELETE TEAM FROM FORUM EDITOR
             "[data-forum-delete]"
         );
 
-    if (deleteForumButton) {
+    if (
+        deleteForumButton &&
+        !adminScope.isPrimary
+    ) {
+
+        deleteForumButton.remove();
+
+    }
+    else if (deleteForumButton) {
 
         deleteForumButton.addEventListener(
             "click",
@@ -3010,7 +3235,7 @@ async function deleteForum(
         const {
             error
         } =
-            await sb.rpc(
+            await adminRpc(
                 "admin_delete_forum",
                 {
                     p_forum_id:
@@ -3216,7 +3441,7 @@ function openTeamForm(
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_update_team",
                                 {
                                     p_team_id:
@@ -3244,7 +3469,7 @@ function openTeamForm(
                         const {
                             data,
                             error
-                        } = await sb.rpc(
+                        } = await adminRpc(
                             "admin_create_team",
                             {
                                 p_forum_id: forumId,
@@ -3462,7 +3687,7 @@ function openDomainForm(
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_update_domain",
                                 {
                                     p_domain_id:
@@ -3490,7 +3715,7 @@ function openDomainForm(
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_create_domain",
                                 {
                                     p_forum_id:
@@ -3566,7 +3791,7 @@ async function deleteTeam(
         const {
             error
         } =
-            await sb.rpc(
+            await adminRpc(
                 "admin_delete_team",
                 {
                     p_team_id:
@@ -3626,7 +3851,7 @@ async function deleteDomain(
         const {
             error
         } =
-            await sb.rpc(
+            await adminRpc(
                 "admin_delete_domain",
                 {
                     p_domain_id:
@@ -4105,7 +4330,7 @@ async function openMemberPicker(
         );
 
 
-    const available =
+    let available =
         profiles.filter(
             profile =>
                 !currentIds.includes(
@@ -4114,6 +4339,68 @@ async function openMemberPicker(
                 profile.status ===
                 "approved"
         );
+
+
+        // Secondary admins only see users relevant to their forum (RLS),
+    // so the list of people who can be added comes from Supabase.
+    if (
+        !adminScope.isPrimary &&
+        type === "forum"
+    ) {
+
+        const {
+            data: addable,
+            error: addableError
+        } =
+            await sb.rpc(
+                "forum_admin_list_addable_profiles",
+                {
+                    p_forum_id:
+                        entityId
+                }
+            );
+
+        if (addableError) {
+
+            console.error(
+                "Addable users:",
+                addableError
+            );
+
+        }
+
+        available =
+            addable || [];
+
+    }
+
+
+    // Secondary admins add team/domain members from their forum only.
+    if (
+        !adminScope.isPrimary &&
+        type !== "forum"
+    ) {
+
+        const parentForumId =
+            type === "team"
+                ? getTeam(entityId)?.forum_id
+                : getDomain(entityId)?.forum_id;
+
+        const forumMemberIds =
+            await getMembership(
+                "forum",
+                parentForumId
+            );
+
+        available =
+            available.filter(
+                profile =>
+                    forumMemberIds.includes(
+                        profile.id
+                    )
+            );
+
+    }
 
 
     const modal =
@@ -4336,7 +4623,7 @@ async function addMember(
     const {
         error
     } =
-        await sb.rpc(
+        await adminRpc(
             rpc,
             params
         );
@@ -4423,7 +4710,7 @@ async function removeMember(
         const {
             error
         } =
-            await sb.rpc(
+            await adminRpc(
                 rpc,
                 params
             );
@@ -5547,7 +5834,7 @@ async function openTaskDetails(
                             const {
                                 error
                             } =
-                                await sb.rpc(
+                                await adminRpc(
                                     "admin_remove_task_member",
                                     {
                                         p_task_id:
@@ -5750,7 +6037,7 @@ async function openTaskMemberPicker(
         );
 
 
-    const available =
+    let available =
         profiles.filter(
             profile =>
                 !currentIds.includes(
@@ -5759,6 +6046,29 @@ async function openTaskMemberPicker(
                 profile.status ===
                 "approved"
         );
+
+
+    // Secondary admins add task members from the task's forum only.
+    if (
+        !adminScope.isPrimary &&
+        task.forum_id
+    ) {
+
+        const forumMemberIds =
+            await getMembership(
+                "forum",
+                task.forum_id
+            );
+
+        available =
+            available.filter(
+                profile =>
+                    forumMemberIds.includes(
+                        profile.id
+                    )
+            );
+
+    }
 
 
     const modal =
@@ -5867,7 +6177,7 @@ async function openTaskMemberPicker(
                         const {
                             error
                         } =
-                            await sb.rpc(
+                            await adminRpc(
                                 "admin_add_task_member",
                                 {
                                     p_task_id:
@@ -6257,7 +6567,7 @@ function openTaskForm(
                     const {
                         error
                     } =
-                        await sb.rpc(
+                        await adminRpc(
                             "admin_update_task",
                             {
                                 p_task_id:
@@ -6278,7 +6588,7 @@ function openTaskForm(
                     const {
                         error
                     } =
-                        await sb.rpc(
+                        await adminRpc(
                             "admin_create_task",
                             payload
                         );
@@ -6347,7 +6657,7 @@ async function deleteTask(
         const {
             error
         } =
-            await sb.rpc(
+            await adminRpc(
                 "admin_delete_task",
                 {
                     p_task_id:
@@ -6423,6 +6733,48 @@ async function loadPendingRequests() {
 
     pendingRequests =
         data || [];
+
+
+    if (
+        !adminScope.isPrimary &&
+        pendingRequests.length
+    ) {
+
+        const {
+            data: requestedMemberships
+        } =
+            await sb
+                .from("forum_members")
+                .select("profile_id, forum_id")
+                .in(
+                    "profile_id",
+                    pendingRequests.map(
+                        request => request.id
+                    )
+                );
+
+        const inScope =
+            new Set(
+                (requestedMemberships || [])
+                    .filter(
+                        row =>
+                            isForumInScope(row.forum_id)
+                    )
+                    .map(
+                        row =>
+                            String(row.profile_id)
+                    )
+            );
+
+        pendingRequests =
+            pendingRequests.filter(
+                request =>
+                    inScope.has(
+                        String(request.id)
+                    )
+            );
+
+    }
 
     renderPendingRequests();
 
@@ -6615,6 +6967,33 @@ async function updateUserStatus(
 
 
     try {
+
+        if (!adminScope.isPrimary) {
+
+            const {
+                error: scopedError
+            } =
+                await sb.rpc(
+                    "forum_admin_set_user_status",
+                    {
+                        p_profile_id:
+                            userId,
+                        p_status:
+                            status
+                    }
+                );
+
+            if (scopedError) {
+                throw scopedError;
+            }
+
+            await loadPendingRequests();
+
+            await loadProfiles();
+
+            return;
+
+        }
 
         const {
             error
@@ -7107,8 +7486,13 @@ async function initAdmin() {
 
 
     if (!adminLoaded) {
+
         return;
+
     }
+
+
+    applyAdminScopeToPage();
 
 
     try {
