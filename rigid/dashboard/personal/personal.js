@@ -70,6 +70,13 @@ let loggedInUserId = null;
 
 let viewingOtherProfile = false;
 
+/*
+ * true when the logged-in user is the primary admin
+ * (profiles.role = "admin") or a secondary admin of any forum
+ * (forum_members.role = "secondary_admin").
+ */
+let loggedInCanAdminister = false;
+
 /* =========================================================
    7. CALENDAR STATE
 ========================================================= */
@@ -654,6 +661,39 @@ async function initializeViewedProfile() {
 
 
         /*
+         * Is the logged-in user an administrator (primary or
+         * forum secondary admin)? Used for the Administration
+         * button; access itself is enforced by Supabase.
+         */
+        const [
+            ownProfileResult,
+            ownAdminForumsResult
+        ] = await Promise.all([
+
+            sb
+                .from("profiles")
+                .select("role")
+                .eq("id", user.id)
+                .maybeSingle(),
+
+            sb
+                .from("forum_members")
+                .select("forum_id")
+                .eq("profile_id", user.id)
+                .eq("role", "secondary_admin")
+                .limit(1)
+
+        ]);
+
+        loggedInCanAdminister =
+            ownProfileResult.data?.role === "admin" ||
+            Boolean(
+                ownAdminForumsResult.data &&
+                ownAdminForumsResult.data.length
+            );
+
+
+        /*
          * Check whether the URL contains:
          *
          * ?profile=MEMBER_ID
@@ -727,11 +767,45 @@ async function initializeViewedProfile() {
             .single();
 
 
-        if (
-            adminProfileError ||
-            !adminProfile ||
-            adminProfile.role !== "admin"
-        ) {
+        /*
+         * Primary admins may view anyone. A secondary admin may
+         * view members of the forum(s) they administer
+         * (checked in Supabase by can_admin_view_profile).
+         */
+        let mayViewProfile =
+            !adminProfileError &&
+            adminProfile?.role === "admin";
+
+        if (!mayViewProfile) {
+
+            const {
+                data: canView,
+                error: canViewError
+            } =
+                await sb.rpc(
+                    "can_admin_view_profile",
+                    {
+                        target_profile_id:
+                            requestedProfileId
+                    }
+                );
+
+            if (canViewError) {
+
+                console.error(
+                    "Member view permission check:",
+                    canViewError
+                );
+
+            }
+
+            mayViewProfile =
+                canView === true;
+
+        }
+
+
+        if (!mayViewProfile) {
 
             console.warn(
                 "Non-admin attempted to view another profile."
@@ -1856,7 +1930,7 @@ function updateWorkspaceButton() {
 
 
     const isAdmin =
-        personalUser.role === "admin";
+        loggedInCanAdminister;
 
 
     if (isAdmin) {

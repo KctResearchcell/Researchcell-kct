@@ -2160,7 +2160,37 @@ async function requestAccess(event) {
    ROUTE APPROVED USER
    ========================================================================= */
 
-function routeApprovedUser(
+/*
+ * Does this user administer at least one forum?
+ * (forum_members.role = "secondary_admin", assigned in Supabase only.)
+ * Any lookup error falls back to the normal member dashboard.
+ */
+async function isSecondaryAdmin(profileId) {
+  if (!profileId) {
+    return false;
+  }
+
+  try {
+    const { data, error } = await sb
+      .from("forum_members")
+      .select("forum_id, role")
+      .eq("profile_id", profileId)
+      .eq("role", "secondary_admin");
+
+    if (error) {
+      console.error("Secondary admin lookup:", error);
+      return false;
+    }
+
+    return Array.isArray(data) && data.length > 0;
+  } catch (error) {
+    console.error("Secondary admin lookup:", error);
+    return false;
+  }
+}
+
+
+async function routeApprovedUser(
   profile
 ) {
 
@@ -2179,22 +2209,17 @@ function routeApprovedUser(
   }
 
 
-  if (
-    profile.role ===
-    "admin"
-  ) {
+  const goToAdmin =
+    profile.role === "admin" ||
+    await isSecondaryAdmin(
+      profile.id
+    );
 
-    window.location.href =
-      LOGIN_CONFIG.ADMIN_DASHBOARD_URL;
 
-  }
-
-  else {
-
-    window.location.href =
-      LOGIN_CONFIG.PERSONAL_DASHBOARD_URL;
-
-  }
+  window.location.href =
+    goToAdmin
+      ? LOGIN_CONFIG.ADMIN_DASHBOARD_URL
+      : LOGIN_CONFIG.PERSONAL_DASHBOARD_URL;
 
 
   return true;
@@ -2544,7 +2569,7 @@ async function loginUser(event) {
       profile.status === "approved"
     ) {
 
-      routeApprovedUser(
+      await routeApprovedUser(
         profile
       );
 
@@ -3698,7 +3723,7 @@ async function setupGoogleUser(
     profile.status === "approved"
   ) {
 
-    routeApprovedUser(
+    await routeApprovedUser(
       profile
     );
 
