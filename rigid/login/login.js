@@ -3120,7 +3120,9 @@ async function handleGoogleDriveCallback() {
 
   }
 
-  if (status === "error") {
+  // connect-google-drive redirects with ?google_drive=denied when the
+  // user cancels Google consent.
+  if (status === "error" || status === "denied") {
 
     setGoogleDriveDisconnectedUI();
 

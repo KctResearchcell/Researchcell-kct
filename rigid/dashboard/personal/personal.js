@@ -3733,7 +3733,7 @@ function initializeQuickCreate() {
 
                     if (type === "reminder") {
 
-                        showUnderConstruction();
+                        openReminderModal();
 
                     } else {
 
@@ -3781,7 +3781,23 @@ function openQuickCreate() {
 
     if (menu) {
 
+        placeQuickCreateMenu(menu, button);
+
         menu.classList.remove("hidden");
+
+        /*
+         * The menu opens below the Status/Journal row, which is
+         * often below the visible area (always on phones). Bring
+         * it into view so the click visibly does something.
+         */
+        setTimeout(() => {
+
+            menu.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+        }, 60);
 
     }
 
@@ -3791,6 +3807,54 @@ function openQuickCreate() {
         button.setAttribute(
             "aria-expanded",
             "true"
+        );
+
+    }
+
+}
+
+
+/*
+ * On phones/tablets the Status and Journal panels stack, so the
+ * menu's normal position (below both) is far from the Create
+ * button. Move it directly under the Status panel there, and
+ * back to its original position on wider screens.
+ */
+function placeQuickCreateMenu(menu, button) {
+
+    if (!menu || !button) {
+        return;
+    }
+
+    if (!menu._rigidHome) {
+
+        menu._rigidHome = {
+            parent: menu.parentNode,
+            next: menu.nextSibling
+        };
+
+    }
+
+    const statusPanel =
+        button.closest("section, article");
+
+    if (
+        window.innerWidth <= 900 &&
+        statusPanel &&
+        statusPanel !== menu.parentNode
+    ) {
+
+        statusPanel.after(menu);
+
+    }
+    else if (
+        window.innerWidth > 900 &&
+        menu.parentNode !== menu._rigidHome.parent
+    ) {
+
+        menu._rigidHome.parent.insertBefore(
+            menu,
+            menu._rigidHome.next
         );
 
     }
@@ -4746,7 +4810,9 @@ async function handleCreateSubmit(event) {
         getElement("createEndDate")?.value || "";
 
     const status =
-        getElement("createStatus")?.value || "ongoing";
+        getElement("createStatus")?.value === "completed"
+            ? "completed"
+            : "ongoing";
 
 
     /* =================================================
@@ -4884,7 +4950,7 @@ async function handleCreateSubmit(event) {
                 error: teamError
             } = await sb
                 .from("team_members")
-                .select("id")
+                .select("team_id")
                 .eq(
                     "team_id",
                     teamId
@@ -4907,7 +4973,9 @@ async function handleCreateSubmit(event) {
                 );
 
                 showToast(
-                    "You are not a member of this team."
+                    teamError
+                        ? `Unable to verify team membership: ${teamError.message}`
+                        : "You are not a member of this team."
                 );
 
                 return;
@@ -4928,7 +4996,7 @@ async function handleCreateSubmit(event) {
                 error: domainError
             } = await sb
                 .from("domain_members")
-                .select("id")
+                .select("domain_id")
                 .eq(
                     "domain_id",
                     domainId
@@ -4951,7 +5019,9 @@ async function handleCreateSubmit(event) {
                 );
 
                 showToast(
-                    "You are not a member of this domain."
+                    domainError
+                        ? `Unable to verify domain membership: ${domainError.message}`
+                        : "You are not a member of this domain."
                 );
 
                 return;
@@ -5026,7 +5096,7 @@ async function handleCreateSubmit(event) {
             );
 
             showToast(
-                "Failed to create work."
+                `Failed to create ${type}: ${error.message || "database error"}`
             );
 
             return;

@@ -1,0 +1,257 @@
+/* =========================================================
+   RiGiD — SHARED RESPONSIVE FIXES
+   Loaded last on every page. Only adds small-screen rules;
+   desktop layouts are unchanged.
+========================================================= */
+
+/* Never allow sideways page scrolling on phones/tablets. */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+/* Wide data tables scroll inside their card instead of the page. */
+@media (max-width: 900px) {
+
+    table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* iOS zooms in on inputs smaller than 16px. */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+
+/* =========================================================
+   WORK PAGE HEADERS
+   (study / paper / project / simulation share one pattern:
+   left = back + brand, centre = section tabs, right = clock)
+========================================================= */
+
+@media (max-width: 1024px) {
+
+    header.study-header,
+    header.paper-header,
+    header.project-header,
+    header.simulation-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        row-gap: 8px;
+        column-gap: 12px;
+        padding: 10px 16px;
+        height: auto;
+        min-height: 0;
+    }
+
+    header.study-header .study-header-left,
+    header.paper-header .paper-header-left,
+    header.project-header .project-header-left,
+    header.simulation-header .simulation-header-left {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 12px;
+    }
+
+    header.study-header .study-header-right,
+    header.paper-header .paper-header-right,
+    header.project-header .project-header-right,
+    header.simulation-header .simulation-header-right {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+
+    header.study-header .study-navigation,
+    header.paper-header .paper-navigation,
+    header.project-header .project-navigation,
+    header.simulation-header .simulation-navigation {
+        order: 3;
+        position: static;
+        left: auto;
+        transform: none;
+        height: auto;
+        flex: 1 1 100%;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    header.study-header .study-navigation > *,
+    header.paper-header .paper-navigation > *,
+    header.project-header .project-navigation > *,
+    header.simulation-header .simulation-navigation > * {
+        flex: 0 0 auto;
+    }
+}
+
+@media (max-width: 600px) {
+
+    header.study-header,
+    header.paper-header,
+    header.project-header,
+    header.simulation-header {
+        padding: 8px 12px;
+    }
+
+    /* Keep only the arrow on the back button. */
+    header .back-button > span:not(.back-icon) {
+        display: none;
+    }
+
+    header .back-button {
+        padding: 6px 8px;
+    }
+
+    /* The "STUDY / PAPER / …" sub-label and date take too much room. */
+    header .study-brand-section,
+    header .paper-brand-section,
+    header .project-brand-section,
+    header .simulation-brand-section,
+    header .study-live-time .live-date,
+    header .paper-live-time .live-date,
+    header .project-live-time .live-date,
+    header .simulation-live-time .live-date,
+    header .live-separator {
+        display: none;
+    }
+
+    header .study-live-time,
+    header .paper-live-time,
+    header .project-live-time,
+    header .simulation-live-time {
+        white-space: nowrap;
+        font-size: 11px;
+    }
+}
+
+
+/* =========================================================
+   MODALS — fit small screens and scroll internally
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .personal-modal-box,
+    .study-modal-box,
+    .paper-modal-box,
+    .project-modal-box,
+    .simulation-modal-box,
+    .prototype-modal-box,
+    .design-modal-box,
+    .remainder-modal-panel,
+    .modal-panel,
+    .modal-box,
+    .modal-content {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-grid,
+    .form-grid,
+    .form-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .modal-grid > *,
+    .form-grid > * {
+        grid-column: auto !important;
+    }
+
+    .modal-actions {
+        flex-wrap: wrap;
+    }
+}
+
+
+/* =========================================================
+   PERSONAL WORKSPACE (personal.html)
+========================================================= */
+
+@media (max-width: 900px) {
+
+    /* Journey: stack heading above the timeline instead of
+       a 340px side column that pushes the graph off-screen. */
+    .timeline-section {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        padding: 16px !important;
+    }
+
+    .timeline-section .section-heading,
+    .timeline-section .timeline-graph {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+    }
+
+    .timeline-section .timeline-graph {
+        top: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Status cards: let them grow instead of clipping. */
+    .work-journal-row .profile-stat-card,
+    .profile-stat-card {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .work-journal-row .profile-stats-grid,
+    .profile-stats-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    /* Completed / Ongoing side by side again. */
+    .stat-status-row,
+    .work-journal-row .profile-stat-card .stat-status-row {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+/* Quick-create (Create +) menu: wrap into a grid on smaller
+   screens instead of squeezing seven buttons into one row. */
+@media (max-width: 1100px) {
+
+    .quick-create-menu-section:not(.hidden) {
+        max-height: 420px;
+    }
+
+    .quick-create-menu-section .quick-create-menu {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .quick-create-menu .quick-create-option {
+        width: 100%;
+        font-size: 14px;
+    }
+}

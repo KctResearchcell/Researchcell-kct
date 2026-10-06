@@ -19,4 +19,8 @@ window.sb =
   window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
-  );  
+  );
+
+// Base URL for Supabase Edge Functions (used by the work pages).
+window.SUPABASE_FUNCTIONS_URL =
+  `${SUPABASE_URL}/functions/v1`;
